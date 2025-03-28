@@ -1,4 +1,4 @@
-package backend.academy.bot;
+package backend.academy.bot.config;
 
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;

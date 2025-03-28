@@ -15,7 +15,7 @@ spring:
     open-in-view: false
 
 server:
-  port: 8081
+  port: 8100
 
 springdoc:
   swagger-ui:
