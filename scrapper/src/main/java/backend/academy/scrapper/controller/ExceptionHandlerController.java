@@ -1,8 +1,6 @@
 package backend.academy.scrapper.controller;
 
 import backend.academy.scrapper.dto.ApiErrorResponse;
-import backend.academy.scrapper.exceptions.InvalidDataException;
-import backend.academy.scrapper.exceptions.NotFoundDataException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -10,22 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 
 @ControllerAdvice
 @Slf4j
 public class ExceptionHandlerController {
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleUnexpectedException(Exception ex) {
-        log.atError()
-            .setMessage("Непредвиденная ошибка")
-            .addKeyValue("exception", ex.getClass().getSimpleName())
-            .addKeyValue("message", ex.getMessage())
-            .log();
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Произошла непредвиденная ошибка", ex);
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
@@ -40,22 +29,27 @@ public class ExceptionHandlerController {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "Ошибка валидации данных: " + errors, ex);
     }
 
-    @ExceptionHandler(InvalidDataException.class)
-    public ResponseEntity<ApiErrorResponse> handleInvalidDataException(InvalidDataException ex) {
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiErrorResponse> handleRuntimeExceptions(RuntimeException ex) {
+        HttpStatus status = resolveResponseStatus(ex);
+
         log.atWarn()
-            .setMessage("Некорректные данные")
+            .setMessage("Обработка исключения")
+            .addKeyValue("type", ex.getClass().getSimpleName())
             .addKeyValue("message", ex.getMessage())
             .log();
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Некорректные данные.", ex);
+
+        return buildErrorResponse(status, ex.getMessage(), ex);
     }
 
-    @ExceptionHandler(NotFoundDataException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotFoundDataException(NotFoundDataException ex) {
-        log.atWarn()
-            .setMessage("Данные не найдены")
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleUnexpectedException(Exception ex) {
+        log.atError()
+            .setMessage("Непредвиденная ошибка")
+            .addKeyValue("exception", ex.getClass().getSimpleName())
             .addKeyValue("message", ex.getMessage())
             .log();
-        return buildErrorResponse(HttpStatus.NOT_FOUND, "Данные не найдены.", ex);
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Произошла непредвиденная ошибка", ex);
     }
 
     private ResponseEntity<ApiErrorResponse> buildErrorResponse(HttpStatus status, String description, Exception ex) {
@@ -66,5 +60,10 @@ public class ExceptionHandlerController {
                 .exceptionName(ex.getClass().getSimpleName())
                 .exceptionMessage(ex.getMessage())
                 .build());
+    }
+
+    private HttpStatus resolveResponseStatus(Throwable ex) {
+        ResponseStatus annotation = ex.getClass().getAnnotation(ResponseStatus.class);
+        return annotation != null ? annotation.value() : HttpStatus.INTERNAL_SERVER_ERROR;
     }
 }

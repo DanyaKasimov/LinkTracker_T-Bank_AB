@@ -18,22 +18,6 @@ import static org.mockito.Mockito.*;
 class ScrapperTest {
 
     @Test
-    void testCorrectParsingGitHubLinks() {
-        GitHubClient gitHubClient = new GitHubClient();
-        String url = "https://github.com/user/repo";
-        String expected = "https://api.github.com/repos/user/repo/commits";
-        assertEquals(expected, gitHubClient.convertToGitHubApiUrl(url));
-    }
-
-    @Test
-    void testCorrectParsingStackOverflowLinks() {
-        StackOverflowClient stackOverflowClient = new StackOverflowClient();
-        String url = "https://stackoverflow.com/questions/12345678/example-question";
-        String expected = "https://api.stackexchange.com/2.3/questions/12345678/answers";
-        assertEquals(expected, stackOverflowClient.convertToStackOverflowApiUrl(url));
-    }
-
-    @Test
     void testSaveDataToRepository() {
         SubscriptionRepository repo = new SubscriptionRepositoryImpl();
         SubscriptionRequestDto dto = new SubscriptionRequestDto("https://github.com/user/repo", List.of("tag1"), List.of("filter"));

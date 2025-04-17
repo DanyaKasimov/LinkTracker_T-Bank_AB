@@ -21,18 +21,4 @@ public class ApiErrorResponse {
     private String exceptionName;
     private String exceptionMessage;
     private List<String> stacktrace;
-
-    public static ApiErrorResponse fromJson(String json) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(json.substring(json.indexOf("{")), ApiErrorResponse.class);
-        } catch (Exception e) {
-            log.atError()
-                .setMessage("Ошибка при парсинге JSON в ApiErrorResponse")
-                .addKeyValue("json", json)
-                .addKeyValue("error", e.getMessage())
-                .log();
-            throw new RuntimeException("Ошибка при парсинге JSON в ApiErrorResponse", e);
-        }
-    }
 }

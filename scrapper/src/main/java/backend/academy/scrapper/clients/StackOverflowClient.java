@@ -1,29 +1,49 @@
 package backend.academy.scrapper.clients;
 
-import backend.academy.scrapper.ScrapperConfig;
+import backend.academy.scrapper.config.ScrapperConfig;
+import backend.academy.scrapper.config.UrlConfig;
 import backend.academy.scrapper.accessor.RestAccessor;
 import backend.academy.scrapper.dto.StackOverflowAnswer;
 import backend.academy.scrapper.exceptions.InvalidDataException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class StackOverflowClient {
-    @Autowired
-    private RestAccessor restAccessor;
-    @Autowired
-    private ScrapperConfig config;
+    private final RestAccessor restAccessor;
 
-    public StackOverflowAnswer getLatestAnswer(String url) {
+    private final ScrapperConfig config;
+
+    private final UrlConfig urlConfig;
+
+    private final String ANSWER_ID = "answer_id";
+
+    private final String ITEMS = "items";
+
+    public Optional<StackOverflowAnswer> getTryLatestAnswer(String url) {
+        ResponseEntity<Map<String, Object>> response = sendRequest(url);
+
+        List<Map<String, Object>> items = (List<Map<String, Object>>) response.getBody().get(ITEMS);
+        if (CollectionUtils.isEmpty(items)) {
+            return Optional.empty();
+        }
+
+        Map<String, Object> latestAnswer = items.getFirst();
+        return Optional.of(new StackOverflowAnswer((Integer) latestAnswer.get(ANSWER_ID), ""));
+    }
+
+    public ResponseEntity<Map<String, Object>> sendRequest(String url) {
         String path = convertToStackOverflowApiUrl(url);
         Map<String, String> params = Map.of(
             "order", "desc",
@@ -32,25 +52,16 @@ public class StackOverflowClient {
             "key", config.stackOverflow().key(),
             "access_token", config.stackOverflow().accessToken()
         );
-
-        ResponseEntity<Map<String, Object>> response = restAccessor.getStackOverflow(
+        return restAccessor.getApiAccess(
+            path,
             new ParameterizedTypeReference<>() {},
             params,
-            Map.of(),
-            path
+            Map.of()
         );
-
-        List<Map<String, Object>> items = (List<Map<String, Object>>) response.getBody().get("items");
-        if (items == null || items.isEmpty()) {
-            return null;
-        }
-
-        Map<String, Object> latestAnswer = items.getFirst();
-        return new StackOverflowAnswer((Integer) latestAnswer.get("answer_id"), "");
     }
 
     public String convertToStackOverflowApiUrl(String url) {
-        String defaultUrl = "https://api.stackexchange.com/2.3/questions/{id}/answers";
+        String defaultUrl = urlConfig.stackOverflowUrl();
         Pattern pattern = Pattern.compile("stackoverflow.com/questions/(\\d+)/");
         Matcher matcher = pattern.matcher(url);
 

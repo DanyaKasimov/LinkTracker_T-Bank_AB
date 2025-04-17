@@ -25,13 +25,13 @@ public class GitHubWatcher {
 
     @Scheduled(fixedRate = 10_000)
     public void checkForUpdates() {
-        subscriptionService.findAllLinksGitHub()
+        subscriptionService.findAllLinksByLink("https://github.com/")
             .forEach(this::processLink);
     }
 
     private void processLink(String link) {
         try {
-            Optional<CommitMessage> messageOpt = Optional.ofNullable(gitHubClient.getLatestCommitHash(link));
+            Optional<CommitMessage> messageOpt = gitHubClient.getTryLatestCommitHash(link);
             String lastCommitHash = lastCommitHashes.get(link);
 
             messageOpt.ifPresentOrElse(

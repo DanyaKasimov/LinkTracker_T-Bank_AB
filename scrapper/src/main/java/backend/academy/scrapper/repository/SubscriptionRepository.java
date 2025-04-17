@@ -2,6 +2,7 @@ package backend.academy.scrapper.repository;
 
 import backend.academy.scrapper.Model.Subscription;
 import backend.academy.scrapper.dto.SubscriptionRequestDto;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -18,11 +19,10 @@ public interface SubscriptionRepository {
 
     boolean existByChatId(Long chatId);
 
-    List<Subscription> findAllByChatId(Long chatId);
+    Collection<Subscription> findAllByChatId(Long chatId);
 
-    List<String> findAllLinksGitHub();
+    Collection<String> findAllLinksByLink(String link);
 
-    List<String> findAllLinksStackOverflow();
 
-    List<Long> findAllChatIdsByLink(String link);
+    Collection<Long> findAllChatIdsByLink(String link);
 }

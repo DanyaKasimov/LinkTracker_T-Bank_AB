@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Slf4j
@@ -24,29 +25,19 @@ public class StackOverflowWatcher {
 
     @Scheduled(fixedRate = 100_000)
     public void checkForUpdates() {
-        subscriptionService.findAllLinksStackOverflow().forEach(this::processLink);
+        subscriptionService.findAllLinksByLink("https://stackoverflow.com/").forEach(this::processLink);
     }
 
     private void processLink(String link) {
         try {
-            StackOverflowAnswer answer = stackOverflowClient.getLatestAnswer(link);
+            Optional<StackOverflowAnswer> answer = stackOverflowClient.getTryLatestAnswer(link);
             Integer lastAnswerId = lastAnswerIds.get(link);
 
-            if (answer == null) {
-                handleNoAnswer(link);
-                return;
-            }
 
-            if (lastAnswerId == null) {
-                handleFirstAnswer(link, answer);
-            } else if (!lastAnswerId.equals(answer.answerId())) {
-                handleNewAnswer(link, answer);
-            } else {
-                log.atInfo()
-                    .setMessage("Новых ответов нет")
-                    .addKeyValue("link", link)
-                    .log();
-            }
+            answer.ifPresentOrElse(
+                message -> handleNewAnswer(link, message, lastAnswerId),
+                () -> handleNoAnswer(link)
+            );
         } catch (Exception e) {
             log.atError()
                 .setMessage("Ошибка при получении ответов")
@@ -64,23 +55,26 @@ public class StackOverflowWatcher {
         lastAnswerIds.put(link, 0);
     }
 
-    private void handleFirstAnswer(String link, StackOverflowAnswer answer) {
-        lastAnswerIds.put(link, answer.answerId());
-        log.atInfo()
-            .setMessage("Первый запуск: установлен ID ответа")
-            .addKeyValue("answerId", answer.answerId())
-            .addKeyValue("link", link)
-            .log();
-    }
+    private void handleNewAnswer(String link, StackOverflowAnswer answer, Integer lastAnswerId) {
+        if (lastAnswerId == null) {
+            lastAnswerIds.put(link, answer.answerId());
+            log.atInfo()
+                .setMessage("Первый запуск: установлен ID ответа")
+                .addKeyValue("answerId", answer.answerId())
+                .addKeyValue("link", link)
+                .log();
+            return;
+        }
 
-    private void handleNewAnswer(String link, StackOverflowAnswer answer) {
-        log.atInfo()
-            .setMessage("Новый ответ")
-            .addKeyValue("answerId", answer.answerId())
-            .addKeyValue("link", link)
-            .log();
-        lastAnswerIds.put(link, answer.answerId());
-        notifySubscribers(link, answer);
+        if (!lastAnswerId.equals(answer.answerId())) {
+            log.atInfo()
+                .setMessage("Новый ответ")
+                .addKeyValue("answerId", answer.answerId())
+                .addKeyValue("link", link)
+                .log();
+            lastAnswerIds.put(link, answer.answerId());
+            notifySubscribers(link, answer);
+        }
     }
 
     private void notifySubscribers(String link, StackOverflowAnswer answer) {

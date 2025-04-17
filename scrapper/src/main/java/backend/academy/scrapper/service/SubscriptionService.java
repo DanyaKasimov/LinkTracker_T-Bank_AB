@@ -4,10 +4,8 @@ import backend.academy.scrapper.Model.Subscription;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
 import backend.academy.scrapper.dto.SubscriptionRequestDto;
-import org.springframework.stereotype.Service;
-import java.util.List;
+import java.util.Collection;
 
-@Service
 public interface SubscriptionService {
 
     Subscription save(Long chatId, SubscriptionRequestDto dto);
@@ -16,9 +14,7 @@ public interface SubscriptionService {
 
     ListLinksResponse getAllLinks(Long chatId);
 
-    List<String> findAllLinksGitHub();
+    Collection<String> findAllLinksByLink(String link);
 
-    List<String> findAllLinksStackOverflow() ;
-
-    List<Long> findAllChatIdsByLink(String link);
+    Collection<Long> findAllChatIdsByLink(String link);
 }

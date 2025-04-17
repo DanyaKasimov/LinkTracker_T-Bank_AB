@@ -5,8 +5,6 @@ import backend.academy.scrapper.dto.SubscriptionRequestDto;
 import backend.academy.scrapper.repository.SubscriptionRepository;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -35,21 +33,18 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
     @Override
     public Subscription delete(Long chatId, String link) {
         Set<Subscription> subscriptions = dataBase.get(chatId);
-
-        if (subscriptions == null) {
+        if (subscriptions == null || subscriptions.isEmpty()) {
             return null;
         }
 
-        Iterator<Subscription> iterator = subscriptions.iterator();
-        while (iterator.hasNext()) {
-            Subscription subscription = iterator.next();
-            if (Objects.equals(subscription.getLink(), link)) {
-                iterator.remove();
-                return subscription;
-            }
-        }
-
-        return null;
+        return subscriptions.stream()
+            .filter(s -> Objects.equals(s.getLink(), link))
+            .findFirst()
+            .map(s -> {
+                subscriptions.remove(s);
+                return s;
+            })
+            .orElse(null);
     }
 
     @Override
@@ -60,14 +55,9 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
     @Override
     public boolean existByLink(String link) {
-        for (Set<Subscription> subscriptions : dataBase.values()) {
-            for (Subscription subscription : subscriptions) {
-                if (subscription.getLink().equals(link)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return dataBase.values().stream()
+            .flatMap(Set::stream)
+            .anyMatch(subscription -> subscription.getLink().equals(link));
     }
 
     @Override
@@ -76,30 +66,22 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
     }
 
     @Override
-    public List<Subscription> findAllByChatId(final Long chatId) {
+    public Collection<Subscription> findAllByChatId(final Long chatId) {
         return dataBase.getOrDefault(chatId, Collections.emptySet()).stream().toList();
     }
 
     @Override
-    public List<String> findAllLinksGitHub() {
+    public Collection<String> findAllLinksByLink(String url) {
         return dataBase.values().stream()
             .flatMap(Set::stream)
             .map(Subscription::getLink)
-            .filter(link -> link.startsWith("https://github.com/"))
+            .filter(link -> link.startsWith(url))
             .toList();
     }
 
-    @Override
-    public List<String> findAllLinksStackOverflow() {
-        return dataBase.values().stream()
-            .flatMap(Set::stream)
-            .map(Subscription::getLink)
-            .filter(link -> link.startsWith("https://stackoverflow.com/"))
-            .toList();
-    }
 
     @Override
-    public List<Long> findAllChatIdsByLink(String link) {
+    public Collection<Long> findAllChatIdsByLink(String link) {
         return dataBase.entrySet().stream()
             .filter(entry -> entry.getValue().stream()
                 .anyMatch(subscription -> Objects.equals(subscription.getLink(), link)))

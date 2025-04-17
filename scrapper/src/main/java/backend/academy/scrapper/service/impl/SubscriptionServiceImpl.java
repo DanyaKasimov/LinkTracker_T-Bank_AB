@@ -11,7 +11,7 @@ import backend.academy.scrapper.exceptions.NotFoundDataException;
 import backend.academy.scrapper.repository.ChatRepository;
 import backend.academy.scrapper.repository.SubscriptionRepository;
 import backend.academy.scrapper.service.SubscriptionService;
-import java.util.List;
+import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +66,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             throw new NotFoundDataException("Чата не существует.");
         }
 
-        List<Subscription> subscriptionList = subscriptionRepository.findAllByChatId(chatId);
+        Collection<Subscription> subscriptionList = subscriptionRepository.findAllByChatId(chatId);
         return ListLinksResponse.builder()
                 .links(subscriptionList)
                 .size(subscriptionList.size())
@@ -74,17 +74,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public List<String> findAllLinksGitHub() {
-        return subscriptionRepository.findAllLinksGitHub();
+    public Collection<String> findAllLinksByLink(String link) {
+        return subscriptionRepository.findAllLinksByLink(link);
     }
 
     @Override
-    public List<String> findAllLinksStackOverflow() {
-        return subscriptionRepository.findAllLinksStackOverflow();
-    }
-
-    @Override
-    public List<Long> findAllChatIdsByLink(String link) {
+    public Collection<Long> findAllChatIdsByLink(String link) {
         if (!subscriptionRepository.existByLink(link)) {
             throw new InvalidDataException("Ссылки - " + link + " не существует");
         }
@@ -100,11 +95,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             return false;
         }
         if (link.matches(GITHUB_PATTERN)) {
-            gitHubClient.getLatestCommitHash(link);
+            gitHubClient.sendRequest(link);
             return true;
         }
         if (link.matches(STACKOVERFLOW_PATTERN)) {
-            stackOverflowClient.getLatestAnswer(link);
+            stackOverflowClient.sendRequest(link);
             return true;
         }
         return false;

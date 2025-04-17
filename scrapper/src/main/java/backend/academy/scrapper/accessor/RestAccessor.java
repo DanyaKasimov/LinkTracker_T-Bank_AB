@@ -29,7 +29,7 @@ public class RestAccessor {
         this.restClient = RestClient.create();
     }
 
-    public <T> ResponseEntity<T> getGitHub(String path, ParameterizedTypeReference<T> responseType,
+    public <T> ResponseEntity<T> getApiAccess(String path, ParameterizedTypeReference<T> responseType,
                                            Map<String, String> queryParams,
                                            Map<String, String> headers) {
         try {
@@ -45,7 +45,7 @@ public class RestAccessor {
                 .toEntity(responseType);
         } catch (RestClientResponseException e) {
             log.atError()
-                .setMessage("Ошибка запроса к GitHub API")
+                .setMessage("Ошибка запроса к API")
                 .addKeyValue("path", path)
                 .addKeyValue("status", e.getStatusCode())
                 .addKeyValue("errorMessage", e.getMessage())
@@ -56,7 +56,7 @@ public class RestAccessor {
             if (e.getStatusCode().equals(HttpStatus.CONFLICT)) {
                 return null;
             }
-            throw new InvalidDataException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -75,43 +75,9 @@ public class RestAccessor {
                 .addKeyValue("url", BOT_URL + path)
                 .addKeyValue("errorMessage", e.getMessage())
                 .log();
-            throw new InvalidDataException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
-
-
-    public <T> ResponseEntity<T> getStackOverflow(ParameterizedTypeReference<T> responseType,
-                                                  Map<String, String> queryParams,
-                                                  Map<String, String> headers,
-                                                  String path) {
-
-        try {
-            URI uri = buildUri(path, queryParams);
-
-            HttpHeaders httpHeaders = new HttpHeaders();
-            headers.forEach(httpHeaders::set);
-
-            return restClient.get()
-                .uri(uri)
-                .headers(h -> h.addAll(httpHeaders))
-                .retrieve()
-                .toEntity(responseType);
-        } catch (RestClientResponseException e) {
-            log.atError()
-                .setMessage("Ошибка запроса к StackOverflow API")
-                .addKeyValue("path", path)
-                .addKeyValue("status", e.getStatusCode())
-                .addKeyValue("errorMessage", e.getMessage())
-                .log();
-
-            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-                throw new InvalidDataException("Ресурс не найден.");
-            }
-            throw new InvalidDataException(e.getMessage());
-        }
-    }
-
-
 
     private URI buildUri(String path, Map<String, String> queryParams) {
         return UriComponentsBuilder.fromUriString(path)
