@@ -1,5 +1,5 @@
 app:
-  telegram-token: ${TELEGRAM_TOKEN} # env variable
+  telegram-token: ${TELEGRAM_TOKEN} # env variable # env variable
 
 spring:
   application:
@@ -12,9 +12,10 @@ spring:
     open-in-view: false
 
 server:
-  port: 8080
+  port: 8081
 
 springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui
+
