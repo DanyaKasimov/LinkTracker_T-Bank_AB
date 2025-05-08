@@ -1,0 +1,39 @@
+app:
+  github-token:
+  stackoverflow:
+    key:
+    access-token:
+
+url:
+  github-url: https://api.github.com
+  stackoverflow-url: https://api.stackexchange.com/2.3/questions/{id}/answer
+liquibase:
+  url: jdbc:postgresql://localhost:5433/link_tracker_db
+  username: postgres
+  password: root
+  file: ./migrations/master.xml
+
+database:
+  type: ORM
+
+spring:
+  application:
+    name: Scrapper
+  liquibase:
+    enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5433/link_tracker_db
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+
+
+server:
+  port: 8100
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
