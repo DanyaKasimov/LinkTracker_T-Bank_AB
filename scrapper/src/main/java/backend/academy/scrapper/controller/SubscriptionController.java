@@ -1,11 +1,11 @@
 package backend.academy.scrapper.controller;
 
-import backend.academy.scrapper.Model.Subscription;
+import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.api.SubscriptionApi;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
 import backend.academy.scrapper.dto.SubscriptionRequestDto;
-import backend.academy.scrapper.service.SubscriptionService;
+import backend.academy.scrapper.service.LinkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class SubscriptionController implements SubscriptionApi {
 
-    private final SubscriptionService subscriptionService;
+    private final LinkService linkService;
 
     @Override
-    public Subscription addSubscription(Long tgChatId, SubscriptionRequestDto dto) {
+    public LinkResponse addSubscription(Long tgChatId, SubscriptionRequestDto dto) {
         log.atInfo()
             .setMessage("Поступил запрос на добавление ссылки на отслеживание")
             .addKeyValue("Link", dto.getLink())
             .addKeyValue("ChatID", tgChatId)
             .log();
 
-        return subscriptionService.save(tgChatId, dto);
+        return linkService.save(tgChatId, dto);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class SubscriptionController implements SubscriptionApi {
             .addKeyValue("ChatID", tgChatId)
             .log();
 
-        return subscriptionService.getAllLinks(tgChatId);
+        return linkService.getAllLinks(tgChatId);
     }
 
     @Override
@@ -46,6 +46,6 @@ public class SubscriptionController implements SubscriptionApi {
             .addKeyValue("Link", link)
             .log();
 
-        return subscriptionService.delete(tgChatId, link);
+        return linkService.delete(tgChatId, link);
     }
 }

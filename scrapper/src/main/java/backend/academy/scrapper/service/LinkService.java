@@ -1,20 +1,21 @@
 package backend.academy.scrapper.service;
 
-import backend.academy.scrapper.Model.Subscription;
+import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
 import backend.academy.scrapper.dto.SubscriptionRequestDto;
 import java.util.Collection;
+import java.util.List;
 
-public interface SubscriptionService {
+public interface LinkService {
 
-    Subscription save(Long chatId, SubscriptionRequestDto dto);
+    LinkResponse save(Long chatId, SubscriptionRequestDto dto);
 
     LinkResponse delete(Long chatId, String link);
 
     ListLinksResponse getAllLinks(Long chatId);
 
-    Collection<String> findAllLinksByLink(String link);
+    List<String> findAllLinksByLink(String link);
 
     Collection<Long> findAllChatIdsByLink(String link);
 }
