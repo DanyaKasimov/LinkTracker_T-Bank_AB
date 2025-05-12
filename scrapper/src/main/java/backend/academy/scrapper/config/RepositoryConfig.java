@@ -25,8 +25,10 @@ public class RepositoryConfig {
     @Value("${database.type}")
     private String accessType;
 
+    private static final String ORM_NAME = "ORM";
+
     private boolean isOrm() {
-        return "ORM".equalsIgnoreCase(accessType);
+        return ORM_NAME.equalsIgnoreCase(accessType);
     }
 
 
