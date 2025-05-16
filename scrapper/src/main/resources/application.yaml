@@ -1,17 +1,13 @@
 app:
-  github-token:
+  github-token: ${GITHUB_TOKEN}
   stackoverflow:
-    key:
-    access-token:
+    key: ${SO_TOKEN_KEY}
+    access-token: ${SO_ACCESS_TOKEN}
 
 url:
   github-url: https://api.github.com
   stackoverflow-url: https://api.stackexchange.com/2.3/questions/{id}/answer
-liquibase:
-  url: jdbc:postgresql://localhost:5433/link_tracker_db
-  username: postgres
-  password: root
-  file: ./migrations/master.xml
+
 
 database:
   type: ORM
@@ -20,11 +16,15 @@ spring:
   application:
     name: Scrapper
   liquibase:
-    enabled: false
+    enabled: true
+    change-log: classpath:/migrations/master.xml
+    url: jdbc:postgresql://localhost:5433/link_tracker_db
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   datasource:
     url: jdbc:postgresql://localhost:5433/link_tracker_db
-    username: postgres
-    password: root
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false

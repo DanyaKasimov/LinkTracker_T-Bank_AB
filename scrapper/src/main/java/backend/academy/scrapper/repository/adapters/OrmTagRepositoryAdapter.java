@@ -50,4 +50,9 @@ public class OrmTagRepositoryAdapter implements TagRepository {
         return jpaRepository.findAllByLink(link);
     }
 
+    @Override
+    public void deleteAllByLinkIn(Collection<Link> links) {
+        jpaRepository.deleteAllByLinkIn(links);
+    }
+
 }

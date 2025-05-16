@@ -6,4 +6,4 @@ public record StackOverflowAnswer(
     String username,
     String createdAt,
     String preview
-) {}
+) implements UserMessage {}

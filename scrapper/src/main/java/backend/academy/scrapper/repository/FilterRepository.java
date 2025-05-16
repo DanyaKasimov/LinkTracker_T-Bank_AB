@@ -1,6 +1,5 @@
 package backend.academy.scrapper.repository;
 
-import backend.academy.scrapper.Model.Chat;
 import backend.academy.scrapper.Model.Filter;
 import backend.academy.scrapper.Model.Link;
 import java.util.Collection;
@@ -18,4 +17,6 @@ public interface FilterRepository {
     void deleteAllByLink(Link link);
 
     List<Filter> findAllByLink(Link link);
+
+    void deleteAllByLinkIn(Collection<Link> links);
 }

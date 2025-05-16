@@ -4,6 +4,7 @@ import backend.academy.scrapper.accessor.RestAccessor;
 import backend.academy.scrapper.dto.GitHubUpdate;
 import backend.academy.scrapper.dto.LinkUpdateDto;
 import backend.academy.scrapper.dto.StackOverflowAnswer;
+import backend.academy.scrapper.dto.UserMessage;
 import backend.academy.scrapper.service.NotificationService;
 import backend.academy.scrapper.service.LinkService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class NotificationHttpServiceImpl implements NotificationService {
     private final LinkService linkService;
 
     @Override
-    public void sendNotification(String link, Object message) {
+    public void sendNotification(String link, UserMessage message) {
         String description = generateDescription(message);
 
         if (description.isEmpty()) {
@@ -38,7 +39,7 @@ public class NotificationHttpServiceImpl implements NotificationService {
         restAccessor.postBot("/updates", updateDto, String.class);
     }
 
-    private String generateDescription(Object message) {
+    private String generateDescription(UserMessage message) {
         if (message instanceof GitHubUpdate gitHubUpdate) {
             return String.format(
                 "[GitHub] %s\nAuthor: %s\nCreated: %s\n%s",

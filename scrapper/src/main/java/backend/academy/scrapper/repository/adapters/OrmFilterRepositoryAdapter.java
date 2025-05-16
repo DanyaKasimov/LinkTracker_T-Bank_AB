@@ -5,7 +5,6 @@ import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.jpa.FilterJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
@@ -44,5 +43,10 @@ public class OrmFilterRepositoryAdapter implements FilterRepository {
     @Override
     public List<Filter> findAllByLink(Link link) {
         return filterJpaRepository.findAllByLink(link);
+    }
+
+    @Override
+    public void deleteAllByLinkIn(Collection<Link> links) {
+        filterJpaRepository.deleteAllByLinkIn(links);
     }
 }

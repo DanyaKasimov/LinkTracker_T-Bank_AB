@@ -18,7 +18,9 @@ import backend.academy.scrapper.service.LinkService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import java.util.Collection;
 import java.util.List;
 
@@ -36,6 +38,10 @@ public class LinkServiceImpl implements LinkService {
     private final ChatService chatService;
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
+
+    private static final String GITHUB_PATTERN = "^https://github\\.com/[a-zA-Z0-9\\-]+/[a-zA-Z0-9\\-]+$";
+    private static final String STACKOVERFLOW_PATTERN = "^https://stackoverflow\\.com/questions/\\d+(?:/[a-zA-Z0-9\\-]+)?$";
+
 
     @Override
     @Transactional
@@ -126,7 +132,7 @@ public class LinkServiceImpl implements LinkService {
     }
 
     private void saveTags(List<String> tagNames, Link link) {
-        if (tagNames == null || tagNames.isEmpty()) return;
+        if (CollectionUtils.isEmpty(tagNames)) return;
 
         List<Tag> tags = tagNames.stream()
             .distinct()
@@ -160,9 +166,6 @@ public class LinkServiceImpl implements LinkService {
     }
 
     public boolean linkIsCorrect(String link) {
-        final String GITHUB_PATTERN = "^https://github\\.com/[a-zA-Z0-9\\-]+/[a-zA-Z0-9\\-]+$";
-        final String STACKOVERFLOW_PATTERN = "^https://stackoverflow\\.com/questions/\\d+(?:/[a-zA-Z0-9\\-]+)?$";
-
         if (link == null) return false;
         if (link.matches(GITHUB_PATTERN)) return gitHubClient.urlIsValid(link);
         if (link.matches(STACKOVERFLOW_PATTERN)) return stackOverflowClient.urlIsValid(link);

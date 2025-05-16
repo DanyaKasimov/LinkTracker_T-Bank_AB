@@ -61,9 +61,6 @@ public class RepositoryIntegrationTest {
     Chat chat;
     Link link;
 
-    @BeforeEach
-    void setup() {
-    }
 
     @Test
     @Transactional

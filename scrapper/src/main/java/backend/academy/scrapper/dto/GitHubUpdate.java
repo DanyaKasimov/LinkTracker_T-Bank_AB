@@ -6,4 +6,4 @@ public record GitHubUpdate(
     String username,
     String createdAt,
     String preview
-) {}
+) implements UserMessage {}

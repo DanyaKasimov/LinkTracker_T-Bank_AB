@@ -1,6 +1,5 @@
 package backend.academy.scrapper.dto;
 
-import backend.academy.scrapper.Model.Link;
 import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

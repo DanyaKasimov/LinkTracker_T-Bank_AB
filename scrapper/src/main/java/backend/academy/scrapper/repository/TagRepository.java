@@ -20,4 +20,5 @@ public interface TagRepository {
 
     List<Tag> findAllByLink(Link link);
 
+    void deleteAllByLinkIn(Collection<Link> links);
 }

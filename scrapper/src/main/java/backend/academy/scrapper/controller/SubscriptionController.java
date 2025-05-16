@@ -1,6 +1,5 @@
 package backend.academy.scrapper.controller;
 
-import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.api.SubscriptionApi;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;

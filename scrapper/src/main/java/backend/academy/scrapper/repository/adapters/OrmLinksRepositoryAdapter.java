@@ -7,6 +7,7 @@ import backend.academy.scrapper.repository.jpa.LinksJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,5 +55,10 @@ public class OrmLinksRepositoryAdapter implements LinksRepository {
     @Override
     public List<Link> findAllByName(String name) {
         return jpaRepository.findAllByName(name);
+    }
+
+    @Override
+    public void deleteAll(Collection<Link> links) {
+        jpaRepository.deleteAll(links);
     }
 }

@@ -44,10 +44,10 @@ public class ChatServiceImpl implements ChatService {
 
         List<Link> links = linksRepository.findAllByChat(chat);
 
-        for (Link link : links) {
-            tagRepository.deleteAllByLink(link);
-            filterRepository.deleteAllByLink(link);
-            linksRepository.delete(link);
+        if (!links.isEmpty()) {
+            tagRepository.deleteAllByLinkIn(links);
+            filterRepository.deleteAllByLinkIn(links);
+            linksRepository.deleteAll(links);
         }
 
         chatRepository.delete(chat);
