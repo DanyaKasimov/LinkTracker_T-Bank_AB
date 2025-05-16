@@ -1,13 +1,15 @@
 package backend.academy.scrapper.repository;
 
-import org.springframework.stereotype.Repository;
+import backend.academy.scrapper.Model.Chat;
+import java.util.Optional;
 
-@Repository
+
 public interface ChatRepository {
+    boolean existsByUserId(Long userId);
 
-    void save(Long id);
+    void save(Chat chat);
 
-    void delete(Long id);
+    void delete(Chat chat);
 
-    boolean isActive(Long id);
+    Optional<Chat> findByUserId(Long userId);
 }

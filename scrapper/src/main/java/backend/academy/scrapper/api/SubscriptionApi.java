@@ -1,6 +1,5 @@
 package backend.academy.scrapper.api;
 
-import backend.academy.scrapper.Model.Subscription;
 import backend.academy.scrapper.dto.ApiErrorResponse;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Tag(name = "Управление подписками", description = "Методы для управления подписками")
@@ -38,7 +36,7 @@ public interface SubscriptionApi {
             })
     @PostMapping("/links")
     @ResponseStatus(HttpStatus.OK)
-    Subscription addSubscription(final @RequestParam @Valid Long tgChatId, final @Valid @RequestBody SubscriptionRequestDto dto);
+    LinkResponse addSubscription(final @RequestParam @Valid Long tgChatId, final @Valid @RequestBody SubscriptionRequestDto dto);
 
     @Operation(description = "Получение списка подписок")
     @ApiResponses(

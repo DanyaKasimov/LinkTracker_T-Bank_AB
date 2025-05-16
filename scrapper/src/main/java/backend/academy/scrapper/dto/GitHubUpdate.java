@@ -1,8 +1,8 @@
 package backend.academy.scrapper.dto;
 
-public record StackOverflowAnswer(
-    Integer answerId,
-    String questionTitle,
+public record GitHubUpdate(
+    String sha,
+    String title,
     String username,
     String createdAt,
     String preview
