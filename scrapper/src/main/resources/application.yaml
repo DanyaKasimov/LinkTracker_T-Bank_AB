@@ -12,6 +12,14 @@ url:
 database:
   type: ORM
 
+transport:
+  type: KAFKA
+
+kafka:
+  bootstrap-servers: localhost:9092
+  topics:
+    notification: notification
+
 spring:
   application:
     name: Scrapper

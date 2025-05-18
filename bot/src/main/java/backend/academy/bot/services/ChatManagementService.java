@@ -3,7 +3,6 @@ package backend.academy.bot.services;
 import backend.academy.bot.dto.LinkUpdateDto;
 import org.springframework.stereotype.Service;
 
-@Service
 public interface ChatManagementService {
 
     String registerChat(String id);

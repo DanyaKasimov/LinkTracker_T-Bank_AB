@@ -1,5 +1,5 @@
 app:
-  telegram-token: ${TELEGRAM_TOKEN}  # env variable # env variable
+  telegram-token: ${TELEGRAM-TOKEN}
 
 spring:
   application:
@@ -10,6 +10,19 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+kafka:
+  bootstrap-servers: localhost:9092
+  group: bot-group
+  topics:
+    notification: notification
+
+redis:
+  duration: 30
 
 server:
   port: 8081

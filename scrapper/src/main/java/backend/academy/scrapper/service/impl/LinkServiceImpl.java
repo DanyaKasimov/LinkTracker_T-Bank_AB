@@ -6,10 +6,12 @@ import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.Model.Tag;
 import backend.academy.scrapper.clients.GitHubClient;
 import backend.academy.scrapper.clients.StackOverflowClient;
+import backend.academy.scrapper.config.kafka.KafkaTopics;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
 import backend.academy.scrapper.dto.SubscriptionRequestDto;
 import backend.academy.scrapper.exceptions.InvalidDataException;
+import backend.academy.scrapper.exceptions.NotFoundDataException;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TagRepository;
@@ -19,6 +21,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import java.util.Collection;
@@ -129,6 +132,12 @@ public class LinkServiceImpl implements LinkService {
                 .getChat()
                 .getUserId())
             .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Link findByLinkName(String link) {
+        return linksRepository.findByName(link).
+            orElseThrow(() -> new NotFoundDataException("Ссылка не найдена"));
     }
 
     private void saveTags(List<String> tagNames, Link link) {

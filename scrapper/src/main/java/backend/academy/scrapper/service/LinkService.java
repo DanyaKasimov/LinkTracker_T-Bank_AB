@@ -1,5 +1,6 @@
 package backend.academy.scrapper.service;
 
+import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
 import backend.academy.scrapper.dto.SubscriptionRequestDto;
@@ -17,4 +18,6 @@ public interface LinkService {
     List<String> findAllLinksByLink(String link);
 
     Collection<Long> findAllChatIdsByLink(String link);
+
+    Link findByLinkName(String link);
 }

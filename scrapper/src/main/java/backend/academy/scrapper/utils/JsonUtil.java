@@ -1,4 +1,4 @@
-package backend.academy.bot.utils;
+package backend.academy.scrapper.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +9,19 @@ public class JsonUtil {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String ERROR_MESSAGE = "Ошибка при парсинге JSON";
+
+    public static String toJson(Object object) {
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (Exception e) {
+            log.atError()
+                .setMessage(ERROR_MESSAGE)
+                .addKeyValue("sourceObject", object != null ? object.getClass().getSimpleName() : "null")
+                .addKeyValue("error", e.getMessage())
+                .log();
+            throw new RuntimeException(ERROR_MESSAGE + ": " + (object != null ? object.getClass().getSimpleName() : "null"), e);
+        }
+    }
 
     public static <T> T fromJson(String json, Class<T> clazz) {
         try {
@@ -21,19 +34,6 @@ public class JsonUtil {
                 .addKeyValue("error", e.getMessage())
                 .log();
             throw new RuntimeException(ERROR_MESSAGE + ": " + clazz.getSimpleName(), e);
-        }
-    }
-
-    public static String toJson(Object object) {
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (Exception e) {
-            log.atError()
-                .setMessage(ERROR_MESSAGE)
-                .addKeyValue("sourceObject", object != null ? object.getClass().getSimpleName() : "null")
-                .addKeyValue("error", e.getMessage())
-                .log();
-            throw new RuntimeException(ERROR_MESSAGE + ": " + (object != null ? object.getClass().getSimpleName() : "null"), e);
         }
     }
 }

@@ -1,4 +1,4 @@
-package backend.academy.scrapper.config;
+package backend.academy.scrapper.config.database;
 
 import backend.academy.scrapper.repository.ChatRepository;
 import backend.academy.scrapper.repository.FilterRepository;

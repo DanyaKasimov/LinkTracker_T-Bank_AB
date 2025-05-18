@@ -1,16 +1,22 @@
 package backend.academy.bot.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import java.util.List;
+import lombok.NoArgsConstructor;
+import java.util.Collection;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class LinkUpdateDto {
-    private String id;
+    private Long id;
 
     private String url;
 
     private String description;
 
-    private List<String> tgChatIds;
+    private Collection<Long> tgChatIds;
 
 }
