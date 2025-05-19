@@ -5,11 +5,13 @@ import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.jpa.FilterJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "ORM")
 @RequiredArgsConstructor
 public class OrmFilterRepositoryAdapter implements FilterRepository {
 

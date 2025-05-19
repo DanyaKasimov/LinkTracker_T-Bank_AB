@@ -3,8 +3,10 @@ package backend.academy.bot.accessor;
 import backend.academy.bot.dto.ApiErrorResponse;
 import backend.academy.bot.exceptions.ErrorResponseException;
 import backend.academy.bot.exceptions.HttpConnectException;
-import backend.academy.bot.utils.JsonUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -26,10 +28,14 @@ public class RestAccessor {
 
     private final RestClient restClient;
 
+    private final ObjectMapper objectMapper;
+
     private static final String BASE_URL = "http://localhost:8100";
 
-    public RestAccessor() {
+    @Autowired
+    public RestAccessor(ObjectMapper objectMapper) {
         this.restClient = RestClient.create();
+        this.objectMapper = objectMapper;
     }
 
     public <T> ResponseEntity<T> get(String path, Class<T> responseType, Map<String, String> queryParams) {
@@ -96,7 +102,13 @@ public class RestAccessor {
     }
 
     private void handleClientError(RestClientResponseException e) {
-        ApiErrorResponse response = JsonUtil.fromJson(e.getResponseBodyAsString(), ApiErrorResponse.class);
+        ApiErrorResponse response;
+        try {
+            response = objectMapper.readValue(e.getResponseBodyAsString(), ApiErrorResponse.class);
+        } catch (JsonProcessingException ex) {
+            log.error(ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
+        }
         log.atError()
             .setMessage(response.getExceptionMessage())
             .addKeyValue("code", e.getStatusCode())

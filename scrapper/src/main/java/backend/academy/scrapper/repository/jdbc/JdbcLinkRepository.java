@@ -5,6 +5,7 @@ import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.repository.LinksRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import java.util.Collection;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "JDBC")
 @RequiredArgsConstructor
 public class JdbcLinkRepository implements LinksRepository {
     private final JdbcTemplate jdbc;

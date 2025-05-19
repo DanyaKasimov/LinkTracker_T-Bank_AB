@@ -6,4 +6,14 @@ public record StackOverflowAnswer(
     String username,
     String createdAt,
     String preview
-) implements UserMessage {}
+) implements UserMessage {
+    @Override
+    public String toString() {
+        return String.format(
+            "**%s** ответил на вопрос \"%s\":\n%s",
+            username(),
+            questionTitle(),
+            preview()
+        );
+    }
+}

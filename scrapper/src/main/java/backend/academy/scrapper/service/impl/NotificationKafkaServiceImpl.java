@@ -5,9 +5,9 @@ import backend.academy.scrapper.config.kafka.KafkaTopics;
 import backend.academy.scrapper.dto.UserMessage;
 import backend.academy.scrapper.service.LinkService;
 import backend.academy.scrapper.service.NotificationService;
-import backend.academy.scrapper.utils.JsonUtil;
-import backend.academy.scrapper.utils.MessageGenerator;
 import backend.academy.scrapper.dto.LinkUpdateDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -21,12 +21,13 @@ public class NotificationKafkaServiceImpl implements NotificationService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final LinkService linkService;
     private final KafkaTopics topics;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void sendNotification(String nameLink, UserMessage message) {
         log.info("Поступил запрос на отправку уведомлений через Kafka.");
 
-        String description = MessageGenerator.generateDescription(message);
+        String description = message.toString();
         if (description.isEmpty()) return;
 
         Link link = linkService.findByLinkName(nameLink);
@@ -38,7 +39,12 @@ public class NotificationKafkaServiceImpl implements NotificationService {
             .tgChatIds(linkService.findAllChatIdsByLink(nameLink))
             .build();
 
-        String payload = JsonUtil.toJson(updateDto);
+        String payload;
+        try {
+            payload = objectMapper.writeValueAsString(updateDto);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e.getMessage());
+        }
 
         kafkaTemplate.send(topics.notification(), payload)
             .whenComplete((result, ex) -> {

@@ -2,12 +2,14 @@ package backend.academy.scrapper.repository.jpa;
 
 import backend.academy.scrapper.Model.Chat;
 import backend.academy.scrapper.Model.Link;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "ORM")
 public interface LinksJpaRepository extends JpaRepository<Link, Long> {
 
    Optional<Link> findByName(String name);

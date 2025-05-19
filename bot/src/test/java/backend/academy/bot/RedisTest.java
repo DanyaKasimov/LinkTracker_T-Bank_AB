@@ -3,7 +3,6 @@ package backend.academy.bot;
 import backend.academy.bot.accessor.RestAccessor;
 import backend.academy.bot.dto.*;
 import backend.academy.bot.services.SubscriptionService;
-import backend.academy.bot.utils.JsonUtil;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -113,15 +112,5 @@ class RedisTest {
         service.getSubscriptions(chatId);
 
         verify(accessor, times(2)).get(anyString(), eq(ListLinksResponse.class), anyMap());
-    }
-
-    @Test
-    void testJsonToDtoMapping() {
-        String json = "{\"id\":1,\"url\":\"https://test.ru\",\"description\":\"desc\",\"tgChatIds\":[100]}";
-        LinkUpdateDto dto = JsonUtil.fromJson(json, LinkUpdateDto.class);
-        assertEquals(1L, dto.getId());
-        assertEquals("https://test.ru", dto.getUrl());
-        assertEquals("desc", dto.getDescription());
-        assertEquals(100L, dto.getTgChatIds().iterator().next());
     }
 }

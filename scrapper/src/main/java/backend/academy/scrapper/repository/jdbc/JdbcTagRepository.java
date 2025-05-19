@@ -4,6 +4,7 @@ import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.Model.Tag;
 import backend.academy.scrapper.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "JDBC")
 @RequiredArgsConstructor
 public class JdbcTagRepository implements TagRepository {
     private final JdbcTemplate jdbc;

@@ -1,5 +1,5 @@
 app:
-  telegram-token: ${TELEGRAM-TOKEN}
+  telegram-token: ${TELEGRAM_TOKEN}
 
 spring:
   application:
@@ -12,11 +12,11 @@ spring:
     open-in-view: false
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 kafka:
-  bootstrap-servers: localhost:9092
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
   group: bot-group
   topics:
     notification: notification

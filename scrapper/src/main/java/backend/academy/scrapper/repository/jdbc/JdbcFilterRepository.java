@@ -4,6 +4,7 @@ import backend.academy.scrapper.Model.Filter;
 import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.repository.FilterRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "JDBC")
 @RequiredArgsConstructor
 public class JdbcFilterRepository implements FilterRepository {
 

@@ -6,7 +6,6 @@ import backend.academy.scrapper.dto.LinkUpdateDto;
 import backend.academy.scrapper.dto.UserMessage;
 import backend.academy.scrapper.service.NotificationService;
 import backend.academy.scrapper.service.LinkService;
-import backend.academy.scrapper.utils.MessageGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,8 +21,7 @@ public class NotificationHttpServiceImpl implements NotificationService {
 
     @Override
     public void sendNotification(String nameLink, UserMessage message) {
-
-        String description = MessageGenerator.generateDescription(message);
+        String description = message.toString();
         Link link = linkService.findByLinkName(nameLink);
 
         if (description.isEmpty()) {

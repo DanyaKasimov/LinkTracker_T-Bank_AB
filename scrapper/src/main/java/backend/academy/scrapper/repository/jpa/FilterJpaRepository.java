@@ -2,12 +2,14 @@ package backend.academy.scrapper.repository.jpa;
 
 import backend.academy.scrapper.Model.Filter;
 import backend.academy.scrapper.Model.Link;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "ORM")
 public interface FilterJpaRepository extends JpaRepository<Filter, Long> {
 
     Filter findByName(String name);

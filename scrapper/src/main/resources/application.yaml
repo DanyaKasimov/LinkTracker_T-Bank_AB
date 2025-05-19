@@ -16,7 +16,7 @@ transport:
   type: KAFKA
 
 kafka:
-  bootstrap-servers: localhost:9092
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
   topics:
     notification: notification
 

@@ -1,6 +1,5 @@
 package backend.academy.scrapper.dto;
 
-import backend.academy.scrapper.utils.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
