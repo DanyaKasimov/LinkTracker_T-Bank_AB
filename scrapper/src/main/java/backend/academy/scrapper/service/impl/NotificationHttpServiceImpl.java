@@ -8,11 +8,13 @@ import backend.academy.scrapper.service.NotificationService;
 import backend.academy.scrapper.service.LinkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "transport.type", havingValue = "HTTP", matchIfMissing = true)
 public class NotificationHttpServiceImpl implements NotificationService {
 
     private final RestAccessor restAccessor;
