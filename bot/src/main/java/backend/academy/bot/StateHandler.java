@@ -6,11 +6,10 @@ import backend.academy.bot.dto.Subscription;
 import backend.academy.bot.dto.SubscriptionRequestDto;
 import backend.academy.bot.exceptions.ErrorResponseException;
 import backend.academy.bot.services.SubscriptionService;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.*;
 
 @Slf4j
 @Component
@@ -22,7 +21,6 @@ public class StateHandler {
     private final Map<String, BotState> chatStates = new HashMap<>();
     private final Map<String, SubscriptionRequestDto> chatData = new HashMap<>();
     private final Map<String, Boolean> chatActive = new HashMap<>();
-
 
     public void handleState(String chatId, String text) {
         if (!chatStates.containsKey(chatId)) return;

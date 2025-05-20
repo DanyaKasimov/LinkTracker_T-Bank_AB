@@ -2,18 +2,18 @@ package backend.academy.scrapper.clients;
 
 import backend.academy.scrapper.constants.GitHubEndpoints;
 import backend.academy.scrapper.dto.GitHubUpdate;
-import backend.academy.scrapper.service.NotificationService;
 import backend.academy.scrapper.service.LinkService;
+import backend.academy.scrapper.service.NotificationService;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.Optional;
-
-import java.util.*;
-import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -84,10 +84,10 @@ public class GitHubWatcher {
             }
         } catch (Exception e) {
             log.atError()
-                .setMessage("Ошибка при обработке ссылки GitHub")
-                .addKeyValue("link", link)
-                .addKeyValue("errorMessage", e.getMessage())
-                .log();
+                    .setMessage("Ошибка при обработке ссылки GitHub")
+                    .addKeyValue("link", link)
+                    .addKeyValue("errorMessage", e.getMessage())
+                    .log();
         }
     }
 
@@ -95,9 +95,9 @@ public class GitHubWatcher {
         Optional<GitHubUpdate> update = gitHubClient.getLatestPRIssue(link, GitHubEndpoints.PULL_REQUEST);
         update.ifPresent(updateData -> {
             log.atInfo()
-                .setMessage("Новый Pull Request")
-                .addKeyValue("link", link)
-                .log();
+                    .setMessage("Новый Pull Request")
+                    .addKeyValue("link", link)
+                    .log();
             notificationService.sendNotification(link, updateData);
         });
     }
@@ -105,10 +105,7 @@ public class GitHubWatcher {
     private void handleIssue(String link) {
         Optional<GitHubUpdate> update = gitHubClient.getLatestPRIssue(link, GitHubEndpoints.ISSUES);
         update.ifPresent(updateData -> {
-            log.atInfo()
-                .setMessage("Новый Issue")
-                .addKeyValue("link", link)
-                .log();
+            log.atInfo().setMessage("Новый Issue").addKeyValue("link", link).log();
             notificationService.sendNotification(link, updateData);
         });
     }
@@ -117,17 +114,14 @@ public class GitHubWatcher {
         Optional<GitHubUpdate> update = gitHubClient.getLatestCommit(link);
         String lastCommitHash = lastCommitHashes.get(link);
 
-        update.ifPresentOrElse(
-            message -> handleNewCommit(link, message, lastCommitHash),
-            () -> handleNoCommit(link)
-        );
+        update.ifPresentOrElse(message -> handleNewCommit(link, message, lastCommitHash), () -> handleNoCommit(link));
     }
 
     private void handleNoCommit(String link) {
         log.atInfo()
-            .setMessage("Коммиты не обнаружены")
-            .addKeyValue("link", link)
-            .log();
+                .setMessage("Коммиты не обнаружены")
+                .addKeyValue("link", link)
+                .log();
         lastCommitHashes.put(link, "");
     }
 
@@ -135,19 +129,22 @@ public class GitHubWatcher {
         if (lastCommitHash == null) {
             lastCommitHashes.put(link, message.sha());
             log.atInfo()
-                .setMessage("Первый запуск: установлен хеш коммита")
-                .addKeyValue("commitHash", message.sha())
-                .addKeyValue("link", link)
-                .log();
+                    .setMessage("Первый запуск: установлен хеш коммита")
+                    .addKeyValue("commitHash", message.sha())
+                    .addKeyValue("link", link)
+                    .log();
             return;
         }
 
-        if (!lastCommitHash.equals(message.sha())) {
+        boolean hashesEqual = MessageDigest.isEqual(
+                lastCommitHash.getBytes(StandardCharsets.UTF_8), message.sha().getBytes(StandardCharsets.UTF_8));
+
+        if (!hashesEqual) {
             log.atInfo()
-                .setMessage("Обнаружен новый коммит")
-                .addKeyValue("commitHash", message.sha())
-                .addKeyValue("link", link)
-                .log();
+                    .setMessage("Обнаружен новый коммит")
+                    .addKeyValue("commitHash", message.sha())
+                    .addKeyValue("link", link)
+                    .log();
 
             lastCommitHashes.put(link, message.sha());
             notificationService.sendNotification(link, message);

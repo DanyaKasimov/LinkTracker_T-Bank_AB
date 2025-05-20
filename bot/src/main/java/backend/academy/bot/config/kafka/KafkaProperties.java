@@ -6,4 +6,4 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "kafka")
-public record KafkaProperties(@NotEmpty String bootstrapServers, @NotEmpty String group){}
+public record KafkaProperties(@NotEmpty String bootstrapServers, @NotEmpty String group) {}

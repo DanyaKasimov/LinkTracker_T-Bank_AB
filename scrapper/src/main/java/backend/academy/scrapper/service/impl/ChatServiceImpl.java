@@ -10,9 +10,9 @@ import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TagRepository;
 import backend.academy.scrapper.service.ChatService;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +55,6 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public Chat findById(Long id) {
-        return chatRepository.findByUserId(id).orElseThrow(
-            () -> new NotFoundDataException("Чат не найден."));
+        return chatRepository.findByUserId(id).orElseThrow(() -> new NotFoundDataException("Чат не найден."));
     }
 }

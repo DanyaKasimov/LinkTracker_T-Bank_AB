@@ -1,5 +1,7 @@
 package backend.academy.bot.config.kafka;
 
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -15,9 +17,6 @@ import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Configuration
 @EnableKafka
 @EnableConfigurationProperties(KafkaProperties.class)
@@ -29,7 +28,7 @@ public class KafkaConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
-            new ConcurrentKafkaListenerContainerFactory<>();
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.setCommonErrorHandler(errorHandler());
         return factory;
@@ -61,8 +60,10 @@ public class KafkaConfig {
 
     @Bean
     public DefaultErrorHandler errorHandler() {
-        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate(),
-            (record, ex) -> new org.apache.kafka.common.TopicPartition(record.topic() + ".DLQ", record.partition()));
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
+                kafkaTemplate(),
+                (record, ex) ->
+                        new org.apache.kafka.common.TopicPartition(record.topic() + ".DLQ", record.partition()));
 
         return new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 2));
     }

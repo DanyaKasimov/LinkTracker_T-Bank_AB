@@ -17,11 +17,11 @@ public class BotController implements BotApi {
     @Override
     public void updateMessage(final LinkUpdateDto dto) {
         log.atInfo()
-            .setMessage("Поступил запрос на обновление сообщений.")
-            .addKeyValue("url", dto.getUrl())
-            .addKeyValue("chatsIds", dto.getTgChatIds())
-            .addKeyValue("description", dto.getDescription())
-            .log();
+                .setMessage("Поступил запрос на обновление сообщений.")
+                .addKeyValue("url", dto.getUrl())
+                .addKeyValue("chatsIds", dto.getTgChatIds())
+                .addKeyValue("description", dto.getDescription())
+                .log();
 
         chatManagementService.sendUpdates(dto);
     }

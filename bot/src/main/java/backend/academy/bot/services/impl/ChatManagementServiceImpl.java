@@ -51,7 +51,7 @@ public class ChatManagementServiceImpl implements ChatManagementService {
         try {
             dto = objectMapper.readValue(dtoJson, LinkUpdateDto.class);
         } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
+            log.error("Error: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
         sendUpdates(dto);

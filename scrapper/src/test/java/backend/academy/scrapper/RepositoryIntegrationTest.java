@@ -1,5 +1,7 @@
 package backend.academy.scrapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import backend.academy.scrapper.Model.Chat;
 import backend.academy.scrapper.Model.Filter;
 import backend.academy.scrapper.Model.Link;
@@ -8,7 +10,7 @@ import backend.academy.scrapper.repository.ChatRepository;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TagRepository;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,24 +23,18 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @Testcontainers
-@TestPropertySource(properties = {
-    "spring.liquibase.enabled=false",
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "database.type=ORM"
-})
+@TestPropertySource(
+        properties = {"spring.liquibase.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop", "database.type=ORM"
+        })
 public class RepositoryIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
-        .withDatabaseName("link_tracker_db")
-        .withUsername("postgres")
-        .withPassword("root");
+            .withDatabaseName("link_tracker_db")
+            .withUsername("postgres")
+            .withPassword("root");
 
     @DynamicPropertySource
     static void overrideProps(DynamicPropertyRegistry registry) {
@@ -51,16 +47,18 @@ public class RepositoryIntegrationTest {
 
     @Autowired
     ChatRepository chatRepo;
+
     @Autowired
     LinksRepository linksRepo;
+
     @Autowired
     FilterRepository filterRepo;
+
     @Autowired
     TagRepository tagRepo;
 
     Chat chat;
     Link link;
-
 
     @Test
     @Transactional

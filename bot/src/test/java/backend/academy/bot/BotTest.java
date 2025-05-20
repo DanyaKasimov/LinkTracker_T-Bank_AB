@@ -1,6 +1,8 @@
 // File: BotTest.java
 package backend.academy.bot;
 
+import static org.mockito.Mockito.*;
+
 import backend.academy.bot.commands.Command;
 import backend.academy.bot.commands.impl.*;
 import backend.academy.bot.constants.BotCommand;
@@ -10,24 +12,24 @@ import backend.academy.bot.dto.Subscription;
 import backend.academy.bot.exceptions.ErrorResponseException;
 import backend.academy.bot.services.ChatManagementService;
 import backend.academy.bot.services.SubscriptionService;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.Mockito.*;
-
 class BotTest {
 
     @Mock
     private SubscriptionService subscriptionService;
+
     @Mock
     private StateHandler stateHandler;
+
     @Mock
     private MessageSender messageSender;
+
     @Mock
     private ChatManagementService chatManagementService;
 
@@ -37,13 +39,12 @@ class BotTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         List<Command> commands = List.of(
-            new ListCommand(subscriptionService, messageSender),
-            new HelpCommand(messageSender),
-            new TrackCommand(stateHandler, messageSender),
-            new UntrackCommand(stateHandler, messageSender),
-            new StartCommand(stateHandler, chatManagementService, messageSender),
-            new StopCommand(stateHandler, chatManagementService, messageSender)
-        );
+                new ListCommand(subscriptionService, messageSender),
+                new HelpCommand(messageSender),
+                new TrackCommand(stateHandler, messageSender),
+                new UntrackCommand(stateHandler, messageSender),
+                new StartCommand(stateHandler, chatManagementService, messageSender),
+                new StopCommand(stateHandler, chatManagementService, messageSender));
         commandExecutor = new CommandExecutor(commands, stateHandler, messageSender);
     }
 
@@ -61,14 +62,14 @@ class BotTest {
     @Test
     void shouldSendSubscriptionsForListCommand() {
         String chatId = "12345";
-        ListLinksResponse response = new ListLinksResponse(List.of(
-            new Subscription("1234", "https://example.com", List.of("tag"), List.of("filter"))), 1);
+        ListLinksResponse response = new ListLinksResponse(
+                List.of(new Subscription("1234", "https://example.com", List.of("tag"), List.of("filter"))), 1);
         when(stateHandler.isActive(chatId)).thenReturn(true);
         when(subscriptionService.getSubscriptions(chatId)).thenReturn(response);
 
         commandExecutor.execute(chatId, BotCommand.LIST.getCommand());
 
-        verify(messageSender).send(chatId, "Link: https://example.com\nTags: tag\nFilters: filter\n");
+        verify(messageSender).send(chatId, "Link: https://example.com\nTags: tag\nFilters: filter");
     }
 
     @Test

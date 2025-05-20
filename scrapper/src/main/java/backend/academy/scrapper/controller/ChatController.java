@@ -16,9 +16,9 @@ public class ChatController implements ChatApi {
     @Override
     public void registerChat(final Long id) {
         log.atInfo()
-            .setMessage("Поступил запрос на регистрацию чата")
-            .addKeyValue("chatId", id)
-            .log();
+                .setMessage("Поступил запрос на регистрацию чата")
+                .addKeyValue("chatId", id)
+                .log();
 
         chatService.registerChat(id);
     }
@@ -26,9 +26,9 @@ public class ChatController implements ChatApi {
     @Override
     public void deleteChat(Long id) {
         log.atInfo()
-            .setMessage("Поступил запрос на удаление чата")
-            .addKeyValue("chatId", id)
-            .log();
+                .setMessage("Поступил запрос на удаление чата")
+                .addKeyValue("chatId", id)
+                .log();
 
         chatService.deleteChat(id);
     }

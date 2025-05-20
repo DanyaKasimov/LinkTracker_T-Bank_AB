@@ -7,10 +7,9 @@ import backend.academy.bot.dto.ListLinksResponse;
 import backend.academy.bot.dto.Subscription;
 import backend.academy.bot.exceptions.ErrorResponseException;
 import backend.academy.bot.services.SubscriptionService;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -27,16 +26,15 @@ public class ListCommand implements Command {
     public void execute(String chatId, String text) {
         try {
             ListLinksResponse links = subscriptionService.getSubscriptions(chatId);
-            messageSender.send(chatId,
-                links.getLinks().isEmpty()
-                    ? "У вас нет подписок."
-                    : links.getLinks().stream()
-                    .map(Subscription::toString)
-                    .collect(Collectors.joining("\n"))
-            );
+            messageSender.send(
+                    chatId,
+                    links.getLinks().isEmpty()
+                            ? "У вас нет подписок."
+                            : links.getLinks().stream()
+                                    .map(Subscription::toString)
+                                    .collect(Collectors.joining("\n")));
         } catch (ErrorResponseException e) {
             messageSender.send(chatId, e.getMessage());
         }
     }
 }
-

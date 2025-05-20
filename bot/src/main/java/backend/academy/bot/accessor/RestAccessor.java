@@ -5,6 +5,9 @@ import backend.academy.bot.exceptions.ErrorResponseException;
 import backend.academy.bot.exceptions.HttpConnectException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.util.Map;
+import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -15,16 +18,12 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.function.Supplier;
-
 @Slf4j
 @Component
 public class RestAccessor {
-    private final String USER_EXCEPTION = "InvalidDataException";
+    private static final String USER_EXCEPTION = "InvalidDataException";
 
-    private final String NOT_FOUND_EXCEPTION = "NotFoundDataException";
+    private static final String NOT_FOUND_EXCEPTION = "NotFoundDataException";
 
     private final RestClient restClient;
 
@@ -40,54 +39,44 @@ public class RestAccessor {
 
     public <T> ResponseEntity<T> get(String path, Class<T> responseType, Map<String, String> queryParams) {
         URI uri = buildUri(path, queryParams);
-        return execute(() -> restClient.get()
-            .uri(uri)
-            .retrieve()
-            .toEntity(responseType));
+        return execute(() -> restClient.get().uri(uri).retrieve().toEntity(responseType));
     }
 
     public <T, R> ResponseEntity<R> post(String path, T body, Class<R> responseType, Map<String, String> queryParams) {
         URI uri = buildUri(path, queryParams);
-        return execute(() -> restClient.post()
-            .uri(uri)
-            .body(body)
-            .retrieve()
-            .toEntity(responseType));
+        return execute(() -> restClient.post().uri(uri).body(body).retrieve().toEntity(responseType));
     }
 
     public void post(String path) {
         URI uri = URI.create(BASE_URL + path);
-        execute(() -> restClient.post()
-            .uri(uri)
-            .retrieve()
-            .toEntity(String.class));
+        execute(() -> restClient.post().uri(uri).retrieve().toEntity(String.class));
     }
 
     public void delete(String path) {
         URI uri = URI.create(BASE_URL + path);
-        execute(() -> restClient.delete()
-            .uri(uri)
-            .retrieve()
-            .toEntity(String.class));
+        execute(() -> restClient.delete().uri(uri).retrieve().toEntity(String.class));
     }
 
-    public <T, R> ResponseEntity<R> delete(String path, T body, Class<R> responseType, Map<String, String> queryParams) {
+    public <T, R> ResponseEntity<R> delete(
+            String path, T body, Class<R> responseType, Map<String, String> queryParams) {
         URI uri = buildUri(path, queryParams);
-        return execute(() -> restClient.method(HttpMethod.DELETE)
-            .uri(uri)
-            .body(body)
-            .retrieve()
-            .toEntity(responseType));
+        return execute(() -> restClient
+                .method(HttpMethod.DELETE)
+                .uri(uri)
+                .body(body)
+                .retrieve()
+                .toEntity(responseType));
     }
 
     private URI buildUri(String path, Map<String, String> queryParams) {
         return UriComponentsBuilder.fromUriString(BASE_URL + path)
-            .queryParams(queryParams.entrySet().stream()
-                .collect(LinkedMultiValueMap::new,
-                    (map, entry) -> map.add(entry.getKey(), entry.getValue()),
-                    LinkedMultiValueMap::putAll))
-            .build()
-            .toUri();
+                .queryParams(queryParams.entrySet().stream()
+                        .collect(
+                                LinkedMultiValueMap::new,
+                                (map, entry) -> map.add(entry.getKey(), entry.getValue()),
+                                LinkedMultiValueMap::putAll))
+                .build()
+                .toUri();
     }
 
     private <T> ResponseEntity<T> execute(Supplier<ResponseEntity<T>> request) {
@@ -106,15 +95,12 @@ public class RestAccessor {
         try {
             response = objectMapper.readValue(e.getResponseBodyAsString(), ApiErrorResponse.class);
         } catch (JsonProcessingException ex) {
-            log.error(ex.getMessage());
+            log.error("Error: {}", ex.getMessage());
             throw new RuntimeException(ex.getMessage());
         }
-        log.atError()
-            .setMessage(response.getExceptionMessage())
-            .addKeyValue("code", e.getStatusCode())
-            .log();
-        if (USER_EXCEPTION.equalsIgnoreCase(response.getExceptionName()) ||
-            NOT_FOUND_EXCEPTION.equalsIgnoreCase(response.getExceptionName())) {
+        log.error("Error: {}", response.getExceptionName());
+        if (USER_EXCEPTION.equalsIgnoreCase(response.getExceptionName())
+                || NOT_FOUND_EXCEPTION.equalsIgnoreCase(response.getExceptionName())) {
             throw new ErrorResponseException(response.getExceptionMessage());
         }
     }

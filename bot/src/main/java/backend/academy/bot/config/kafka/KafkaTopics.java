@@ -6,5 +6,4 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "kafka.topics", ignoreUnknownFields = false)
-public record KafkaTopics(@NotEmpty String notification) {
-}
+public record KafkaTopics(@NotEmpty String notification) {}

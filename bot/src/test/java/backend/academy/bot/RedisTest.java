@@ -1,36 +1,33 @@
 package backend.academy.bot;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import backend.academy.bot.accessor.RestAccessor;
 import backend.academy.bot.dto.*;
 import backend.academy.bot.services.SubscriptionService;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import org.springframework.http.ResponseEntity;
-
 @Testcontainers
 @SpringBootTest
 class RedisTest {
 
     @Container
-    static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
-        .withExposedPorts(6379);
+    static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine").withExposedPorts(6379);
 
     @DynamicPropertySource
     static void redisProperties(DynamicPropertyRegistry registry) {
@@ -57,7 +54,8 @@ class RedisTest {
     CacheManager cacheManager;
 
     private final String chatId = "12345";
-    private final SubscriptionRequestDto req = new SubscriptionRequestDto("https://example.com", List.of("tag1"), List.of("filter1"));
+    private final SubscriptionRequestDto req =
+            new SubscriptionRequestDto("https://example.com", List.of("tag1"), List.of("filter1"));
 
     @BeforeEach
     void clearCache() {
@@ -67,12 +65,12 @@ class RedisTest {
 
     @Test
     void testCachingWorksOnGetSubscriptions() {
-        Subscription sub = new Subscription(UUID.randomUUID().toString(), "https://example.com", List.of("tag1"), List.of("filter1"));
-        ListLinksResponse mockResponse = ListLinksResponse.builder()
-            .links(List.of(sub))
-            .size(1)
-            .build();
-        when(accessor.get(anyString(), eq(ListLinksResponse.class), anyMap())).thenReturn(ResponseEntity.ok(mockResponse));
+        Subscription sub = new Subscription(
+                UUID.randomUUID().toString(), "https://example.com", List.of("tag1"), List.of("filter1"));
+        ListLinksResponse mockResponse =
+                ListLinksResponse.builder().links(List.of(sub)).size(1).build();
+        when(accessor.get(anyString(), eq(ListLinksResponse.class), anyMap()))
+                .thenReturn(ResponseEntity.ok(mockResponse));
 
         ListLinksResponse first = service.getSubscriptions(chatId);
 
@@ -83,10 +81,13 @@ class RedisTest {
 
     @Test
     void testCacheEvictedOnAddSubscription() {
-        ListLinksResponse initial = ListLinksResponse.builder().links(List.of()).size(0).build();
+        ListLinksResponse initial =
+                ListLinksResponse.builder().links(List.of()).size(0).build();
         when(accessor.get(anyString(), eq(ListLinksResponse.class), anyMap())).thenReturn(ResponseEntity.ok(initial));
-        Subscription sub = new Subscription(UUID.randomUUID().toString(), "https://example.com", List.of("tag1"), List.of("filter1"));
-        when(accessor.post(anyString(), any(), eq(Subscription.class), anyMap())).thenReturn(ResponseEntity.ok(sub));
+        Subscription sub = new Subscription(
+                UUID.randomUUID().toString(), "https://example.com", List.of("tag1"), List.of("filter1"));
+        when(accessor.post(anyString(), any(), eq(Subscription.class), anyMap()))
+                .thenReturn(ResponseEntity.ok(sub));
 
         service.getSubscriptions(chatId);
         service.addSubscription(chatId, req);
@@ -97,15 +98,17 @@ class RedisTest {
 
     @Test
     void testCacheEvictedOnRemoveSubscription() {
-        ListLinksResponse initial = ListLinksResponse.builder().links(List.of()).size(0).build();
+        ListLinksResponse initial =
+                ListLinksResponse.builder().links(List.of()).size(0).build();
         when(accessor.get(anyString(), eq(ListLinksResponse.class), anyMap())).thenReturn(ResponseEntity.ok(initial));
         LinkResponse removed = LinkResponse.builder()
-            .id(UUID.randomUUID().toString())
-            .link("https://example.com")
-            .tags(List.of("tag1"))
-            .filters(List.of("filter1"))
-            .build();
-        when(accessor.delete(anyString(), any(), eq(LinkResponse.class), anyMap())).thenReturn(ResponseEntity.ok(removed));
+                .id(UUID.randomUUID().toString())
+                .link("https://example.com")
+                .tags(List.of("tag1"))
+                .filters(List.of("filter1"))
+                .build();
+        when(accessor.delete(anyString(), any(), eq(LinkResponse.class), anyMap()))
+                .thenReturn(ResponseEntity.ok(removed));
 
         service.getSubscriptions(chatId);
         service.removeSubscription(chatId, "https://example.com");

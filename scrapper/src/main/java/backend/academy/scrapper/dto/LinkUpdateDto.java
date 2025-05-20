@@ -1,10 +1,10 @@
 package backend.academy.scrapper.dto;
 
+import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.Collection;
 
 @Data
 @Builder
@@ -18,5 +18,4 @@ public class LinkUpdateDto {
     private String description;
 
     private Collection<Long> tgChatIds;
-
 }

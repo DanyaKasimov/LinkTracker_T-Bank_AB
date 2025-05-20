@@ -3,14 +3,15 @@ package backend.academy.scrapper.repository.jdbc;
 import backend.academy.scrapper.Model.Filter;
 import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.repository.FilterRepository;
+import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 @ConditionalOnProperty(name = "database.type", havingValue = "JDBC")
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class JdbcFilterRepository implements FilterRepository {
 
     private final JdbcTemplate jdbc;
+    private final NamedParameterJdbcTemplate namedJdbc;
 
     private static final String SQL_INSERT = "INSERT INTO filters (name, link_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
     private static final String SQL_EXISTS_BY_NAME = "SELECT COUNT(*) FROM filters WHERE name = ?";
@@ -25,7 +27,7 @@ public class JdbcFilterRepository implements FilterRepository {
     private static final String SQL_DELETE = "DELETE FROM filters WHERE id = ?";
     private static final String SQL_DELETE_ALL_BY_LINK = "DELETE FROM filters WHERE link_id = ?";
     private static final String SQL_FIND_ALL_BY_LINK = "SELECT id, name, link_id FROM filters WHERE link_id = ?";
-    private static final String SQL_DELETE_ALL_BY_LINKS = "DELETE FROM filters WHERE link_id IN (%s)";
+    private static final String SQL_DELETE_ALL_BY_LINKS = "DELETE FROM filters WHERE link_id IN (:ids)";
 
     @Override
     @Transactional
@@ -44,8 +46,11 @@ public class JdbcFilterRepository implements FilterRepository {
 
     @Override
     public Filter findByName(String name) {
-        return jdbc.queryForObject(SQL_FIND_BY_NAME, (rs, rowNum) ->
-            new Filter(rs.getLong("id"), rs.getString("name"), new Link(rs.getLong("link_id"), null, null)), name);
+        return jdbc.queryForObject(
+                SQL_FIND_BY_NAME,
+                (rs, rowNum) ->
+                        new Filter(rs.getLong("id"), rs.getString("name"), new Link(rs.getLong("link_id"), null, null)),
+                name);
     }
 
     @Override
@@ -60,23 +65,19 @@ public class JdbcFilterRepository implements FilterRepository {
 
     @Override
     public List<Filter> findAllByLink(Link link) {
-        return jdbc.query(SQL_FIND_ALL_BY_LINK, (rs, rowNum) ->
-            new Filter(rs.getLong("id"), rs.getString("name"), link), link.getId());
+        return jdbc.query(
+                SQL_FIND_ALL_BY_LINK,
+                (rs, rowNum) -> new Filter(rs.getLong("id"), rs.getString("name"), link),
+                link.getId());
     }
 
     @Override
     public void deleteAllByLinkIn(Collection<Link> links) {
         if (links.isEmpty()) return;
 
-        List<Long> ids = links.stream()
-            .map(Link::getId)
-            .toList();
+        List<Long> ids = links.stream().map(Link::getId).toList();
+        MapSqlParameterSource parameters = new MapSqlParameterSource("ids", ids);
 
-        String placeholders = ids.stream()
-            .map(id -> "?")
-            .collect(Collectors.joining(", "));
-
-        String query = String.format(SQL_DELETE_ALL_BY_LINKS, placeholders);
-        jdbc.update(query, ids.toArray());
+        namedJdbc.update(SQL_DELETE_ALL_BY_LINKS, parameters);
     }
 }

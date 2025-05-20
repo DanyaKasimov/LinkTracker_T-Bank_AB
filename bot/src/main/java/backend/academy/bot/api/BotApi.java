@@ -18,16 +18,16 @@ public interface BotApi {
 
     @Operation(description = "Отправить сообщение")
     @ApiResponses(
-        value = {
-            @ApiResponse(responseCode = "200", description = "Обновление отработано"),
-            @ApiResponse(
-                responseCode = "400",
-                description = "Некорректные параметры запроса",
-                content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ApiErrorResponse.class))),
-        })
+            value = {
+                @ApiResponse(responseCode = "200", description = "Обновление отработано"),
+                @ApiResponse(
+                        responseCode = "400",
+                        description = "Некорректные параметры запроса",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ApiErrorResponse.class))),
+            })
     @PostMapping("/updates")
     @ResponseStatus(HttpStatus.OK)
     void updateMessage(final @RequestBody LinkUpdateDto dto);

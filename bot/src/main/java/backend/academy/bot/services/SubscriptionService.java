@@ -1,11 +1,9 @@
 package backend.academy.bot.services;
 
-import java.util.*;
 import backend.academy.bot.dto.LinkResponse;
 import backend.academy.bot.dto.ListLinksResponse;
 import backend.academy.bot.dto.Subscription;
 import backend.academy.bot.dto.SubscriptionRequestDto;
-import org.springframework.stereotype.Service;
 
 public interface SubscriptionService {
 

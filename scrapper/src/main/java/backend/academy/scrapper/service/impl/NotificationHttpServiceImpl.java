@@ -4,8 +4,8 @@ import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.accessor.RestAccessor;
 import backend.academy.scrapper.dto.LinkUpdateDto;
 import backend.academy.scrapper.dto.UserMessage;
-import backend.academy.scrapper.service.NotificationService;
 import backend.academy.scrapper.service.LinkService;
+import backend.academy.scrapper.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,11 +31,11 @@ public class NotificationHttpServiceImpl implements NotificationService {
         }
 
         LinkUpdateDto updateDto = LinkUpdateDto.builder()
-            .id(link.getId())
-            .url(nameLink)
-            .description(description)
-            .tgChatIds(linkService.findAllChatIdsByLink(nameLink))
-            .build();
+                .id(link.getId())
+                .url(nameLink)
+                .description(description)
+                .tgChatIds(linkService.findAllChatIdsByLink(nameLink))
+                .build();
 
         restAccessor.postBot("/updates", updateDto, String.class);
     }

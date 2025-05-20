@@ -2,10 +2,10 @@ package backend.academy.scrapper.service.impl;
 
 import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.config.kafka.KafkaTopics;
+import backend.academy.scrapper.dto.LinkUpdateDto;
 import backend.academy.scrapper.dto.UserMessage;
 import backend.academy.scrapper.service.LinkService;
 import backend.academy.scrapper.service.NotificationService;
-import backend.academy.scrapper.dto.LinkUpdateDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -35,11 +35,11 @@ public class NotificationKafkaServiceImpl implements NotificationService {
         Link link = linkService.findByLinkName(nameLink);
 
         LinkUpdateDto updateDto = LinkUpdateDto.builder()
-            .id(link.getId())
-            .url(nameLink)
-            .description(description)
-            .tgChatIds(linkService.findAllChatIdsByLink(nameLink))
-            .build();
+                .id(link.getId())
+                .url(nameLink)
+                .description(description)
+                .tgChatIds(linkService.findAllChatIdsByLink(nameLink))
+                .build();
 
         String payload;
         try {
@@ -48,13 +48,12 @@ public class NotificationKafkaServiceImpl implements NotificationService {
             throw new RuntimeException(e.getMessage());
         }
 
-        kafkaTemplate.send(topics.notification(), payload)
-            .whenComplete((result, ex) -> {
-                if (ex != null) {
-                    log.error("Ошибка при отправке Kafka-сообщения в основной топик", ex);
-                } else {
-                    log.info("Успешно отправлено сообщение: {}", result.getRecordMetadata());
-                }
-            });
+        kafkaTemplate.send(topics.notification(), payload).whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Ошибка при отправке Kafka-сообщения в основной топик", ex);
+            } else {
+                log.info("Успешно отправлено сообщение: {}", result.getRecordMetadata());
+            }
+        });
     }
 }

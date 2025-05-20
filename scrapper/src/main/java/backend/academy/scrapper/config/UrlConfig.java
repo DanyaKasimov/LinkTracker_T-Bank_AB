@@ -6,4 +6,4 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "url", ignoreUnknownFields = false)
-public record UrlConfig(@NotEmpty String githubUrl, @NotEmpty String stackOverflowUrl) { }
+public record UrlConfig(@NotEmpty String githubUrl, @NotEmpty String stackOverflowUrl) {}
