@@ -5,19 +5,17 @@ import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.config.UrlConfig;
 import backend.academy.scrapper.dto.StackOverflowAnswer;
 import backend.academy.scrapper.exceptions.InvalidDataException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -40,54 +38,34 @@ public class StackOverflowClient {
     private static final String ANSWER_ID_FIELD = "answer_id";
 
     public Optional<StackOverflowAnswer> getLatestAnswerOrComment(String originalUrl) {
-        return buildApiUrl(originalUrl)
-            .flatMap(this::getFirstItem)
-            .map(item -> {
-                Integer answerId = (Integer) item.get(ANSWER_ID_FIELD);
-                String preview = trimPreview(asString(item.get(BODY_FIELD)));
-                String createdAt = asString(item.get(CREATION_DATE_FIELD));
-                Map<String, Object> owner = asMap(item.get(OWNER_FIELD));
-                String username = asString(owner.get(DISPLAY_NAME_FIELD));
-                String title = asString(item.get(TITLE_FIELD));
-                return new StackOverflowAnswer(
-                    answerId,
-                    title,
-                    username,
-                    createdAt,
-                    preview
-                );
-            });
+        return buildApiUrl(originalUrl).flatMap(this::getFirstItem).map(item -> {
+            Integer answerId = (Integer) item.get(ANSWER_ID_FIELD);
+            String preview = trimPreview(asString(item.get(BODY_FIELD)));
+            String createdAt = asString(item.get(CREATION_DATE_FIELD));
+            Map<String, Object> owner = asMap(item.get(OWNER_FIELD));
+            String username = asString(owner.get(DISPLAY_NAME_FIELD));
+            String title = asString(item.get(TITLE_FIELD));
+            return new StackOverflowAnswer(answerId, title, username, createdAt, preview);
+        });
     }
-
 
     private Optional<Map<String, Object>> getFirstItem(String apiUrl) {
-        ResponseEntity<Map<String, Object>> response = sendRequest(apiUrl);
-        if (response == null || CollectionUtils.isEmpty((List<?>) Objects.requireNonNull(response.getBody()).get(ITEMS_FIELD))) {
-            return Optional.empty();
-        }
-
-        List<Map<String, Object>> items = (List<Map<String, Object>>) response.getBody().get(ITEMS_FIELD);
-        return Optional.ofNullable(items.getFirst());
+        return Optional.ofNullable(sendRequest(apiUrl))
+                .map(ResponseEntity::getBody)
+                .map(body -> (List<Map<String, Object>>) body.get(ITEMS_FIELD))
+                .filter(items -> !CollectionUtils.isEmpty(items))
+                .map(List::getFirst);
     }
-
 
     private ResponseEntity<Map<String, Object>> sendRequest(String apiUrl) {
         Map<String, String> params = Map.of(
-            "order", "desc",
-            "sort", "creation",
-            "site", "stackoverflow",
-            "key", config.stackOverflow().key(),
-            "access_token", config.stackOverflow().accessToken()
-        );
+                "order", "desc",
+                "sort", "creation",
+                "site", "stackoverflow",
+                "key", config.stackOverflow().key(),
+                "access_token", config.stackOverflow().accessToken());
 
-        return restAccessor.getApiAccess(
-            apiUrl,
-            new ParameterizedTypeReference<>() {
-            },
-            params,
-            Map.of()
-        );
-
+        return restAccessor.getApiAccess(apiUrl, new ParameterizedTypeReference<>() {}, params, Map.of());
     }
 
     private Optional<String> buildApiUrl(String url) {
@@ -118,17 +96,17 @@ public class StackOverflowClient {
             apiUrl = buildApiUrl(url);
 
             if (apiUrl.isPresent()) {
-                ResponseEntity<Map<String, Object>> response = sendRequest(apiUrl.get());
+                ResponseEntity<Map<String, Object>> response = sendRequest(apiUrl.orElseThrow());
                 return response != null && !CollectionUtils.isEmpty(response.getBody());
             }
 
             return false;
         } catch (Exception e) {
             log.atDebug()
-                .setMessage("Не удалось проверить StackOverflow URL")
-                .addKeyValue("apiUrl", apiUrl.orElse("empty"))
-                .addKeyValue("error", e.getMessage())
-                .log();
+                    .setMessage("Не удалось проверить StackOverflow URL")
+                    .addKeyValue("apiUrl", apiUrl.orElse("empty"))
+                    .addKeyValue("error", e.getMessage())
+                    .log();
             return false;
         }
     }

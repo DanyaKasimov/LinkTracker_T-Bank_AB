@@ -10,22 +10,21 @@ import backend.academy.scrapper.dto.LinkResponse;
 import backend.academy.scrapper.dto.ListLinksResponse;
 import backend.academy.scrapper.dto.SubscriptionRequestDto;
 import backend.academy.scrapper.exceptions.InvalidDataException;
+import backend.academy.scrapper.exceptions.NotFoundDataException;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TagRepository;
 import backend.academy.scrapper.service.ChatService;
 import backend.academy.scrapper.service.LinkService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import java.util.*;
 import java.util.Collection;
 import java.util.List;
-
-import java.util.*;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
@@ -40,8 +39,8 @@ public class LinkServiceImpl implements LinkService {
     private final StackOverflowClient stackOverflowClient;
 
     private static final String GITHUB_PATTERN = "^https://github\\.com/[a-zA-Z0-9\\-]+/[a-zA-Z0-9\\-]+$";
-    private static final String STACKOVERFLOW_PATTERN = "^https://stackoverflow\\.com/questions/\\d+(?:/[a-zA-Z0-9\\-]+)?$";
-
+    private static final String STACKOVERFLOW_PATTERN =
+            "^https://stackoverflow\\.com/questions/\\d{1,10}(?:/[a-zA-Z0-9\\-]{1,50})?$";
 
     @Override
     @Transactional
@@ -57,28 +56,27 @@ public class LinkServiceImpl implements LinkService {
             throw new InvalidDataException("Некорректная ссылка.");
         }
 
-        Link link = linksRepository.save(Link.builder()
-            .name(dto.getLink())
-            .chat(chat)
-            .build());
+        Link link = linksRepository.save(
+                Link.builder().name(dto.getLink()).chat(chat).build());
 
         saveTags(dto.getTags(), link);
         saveFilters(dto.getFilters(), link);
 
         return LinkResponse.builder()
-            .id(chat.getUserId().toString())
-            .link(link.getName())
-            .tags(tagsOf(link))
-            .filters(filtersOf(link))
-            .build();
+                .id(chat.getUserId().toString())
+                .link(link.getName())
+                .tags(tagsOf(link))
+                .filters(filtersOf(link))
+                .build();
     }
 
     @Override
     @Transactional
     public LinkResponse delete(Long chatId, String linkName) {
         Chat chat = chatService.findById(chatId);
-        Link link = linksRepository.findByNameAndChat(linkName, chat)
-            .orElseThrow(() -> new InvalidDataException("Ссылка не найдена."));
+        Link link = linksRepository
+                .findByNameAndChat(linkName, chat)
+                .orElseThrow(() -> new InvalidDataException("Ссылка не найдена."));
 
         List<String> removedTags = tagsOf(link);
         List<String> removedFilters = filtersOf(link);
@@ -88,11 +86,11 @@ public class LinkServiceImpl implements LinkService {
         linksRepository.delete(link);
 
         return LinkResponse.builder()
-            .id(chat.getUserId().toString())
-            .link(link.getName())
-            .tags(removedTags)
-            .filters(removedFilters)
-            .build();
+                .id(chat.getUserId().toString())
+                .link(link.getName())
+                .tags(removedTags)
+                .filters(removedFilters)
+                .build();
     }
 
     @Override
@@ -100,22 +98,23 @@ public class LinkServiceImpl implements LinkService {
         Chat chat = chatService.findById(chatId);
         List<Link> links = linksRepository.findAllByChat(chat);
 
-        List<LinkResponse> responses = links.stream().map(link ->
-            LinkResponse.builder()
-                .id(link.getId().toString())
-                .link(link.getName())
-                .tags(tagsOf(link))
-                .filters(filtersOf(link))
-                .build()
-        ).toList();
+        List<LinkResponse> responses = links.stream()
+                .map(link -> LinkResponse.builder()
+                        .id(link.getId().toString())
+                        .link(link.getName())
+                        .tags(tagsOf(link))
+                        .filters(filtersOf(link))
+                        .build())
+                .toList();
 
         return new ListLinksResponse(responses, responses.size());
     }
 
     @Override
     public List<String> findAllLinksByLink(String urlPrefix) {
-        return linksRepository.findAllByNameStartingWith(urlPrefix)
-            .stream().map(Link::getName).toList();
+        return linksRepository.findAllByNameStartingWith(urlPrefix).stream()
+                .map(Link::getName)
+                .toList();
     }
 
     @Override
@@ -124,20 +123,21 @@ public class LinkServiceImpl implements LinkService {
         if (links.isEmpty()) {
             throw new InvalidDataException("Ссылки - " + linkName + " не существует");
         }
-        return links.stream()
-            .map(link -> link
-                .getChat()
-                .getUserId())
-            .collect(Collectors.toSet());
+        return links.stream().map(link -> link.getChat().getUserId()).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Link findByLinkName(String link) {
+        return linksRepository.findByName(link).orElseThrow(() -> new NotFoundDataException("Ссылка не найдена"));
     }
 
     private void saveTags(List<String> tagNames, Link link) {
         if (CollectionUtils.isEmpty(tagNames)) return;
 
         List<Tag> tags = tagNames.stream()
-            .distinct()
-            .map(name -> Tag.builder().name(name).link(link).build())
-            .toList();
+                .distinct()
+                .map(name -> Tag.builder().name(name).link(link).build())
+                .toList();
 
         tagRepository.saveAll(tags);
     }
@@ -146,23 +146,21 @@ public class LinkServiceImpl implements LinkService {
         if (filterNames == null || filterNames.isEmpty()) return;
 
         List<Filter> filters = filterNames.stream()
-            .distinct()
-            .map(name -> Filter.builder().name(name).link(link).build())
-            .toList();
+                .distinct()
+                .map(name -> Filter.builder().name(name).link(link).build())
+                .toList();
 
         filterRepository.saveAll(filters);
     }
 
     private List<String> tagsOf(Link link) {
-        return tagRepository.findAllByLink(link).stream()
-            .map(Tag::getName)
-            .toList();
+        return tagRepository.findAllByLink(link).stream().map(Tag::getName).toList();
     }
 
     private List<String> filtersOf(Link link) {
         return filterRepository.findAllByLink(link).stream()
-            .map(Filter::getName)
-            .toList();
+                .map(Filter::getName)
+                .toList();
     }
 
     public boolean linkIsCorrect(String link) {

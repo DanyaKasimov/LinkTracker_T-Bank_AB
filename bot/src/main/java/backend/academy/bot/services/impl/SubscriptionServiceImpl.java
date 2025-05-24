@@ -10,6 +10,8 @@ import backend.academy.bot.services.SubscriptionService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final RestAccessor accessor;
 
     @Override
+    @CacheEvict(value = "subscriptions", key = "#chatId")
     public Subscription addSubscription(final String chatId, final SubscriptionRequestDto data) {
         Map<String, String> params = Map.of("tgChatId", chatId);
         ResponseEntity<Subscription> response = accessor.post("/links", data, Subscription.class, params);
@@ -28,6 +31,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @CacheEvict(value = "subscriptions", key = "#chatId")
     public LinkResponse removeSubscription(final String chatId, final String url) throws ErrorResponseException {
         Map<String, String> params = Map.of("tgChatId", chatId);
         ResponseEntity<LinkResponse> response = accessor.delete("/links", url, LinkResponse.class, params);
@@ -35,6 +39,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @Cacheable(value = "subscriptions", key = "#chatId")
     public ListLinksResponse getSubscriptions(final String chatId) throws ErrorResponseException {
         Map<String, String> params = Map.of("tgChatId", chatId);
         ResponseEntity<ListLinksResponse> response = accessor.get("/links", ListLinksResponse.class, params);

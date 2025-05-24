@@ -19,10 +19,10 @@ public class SubscriptionController implements SubscriptionApi {
     @Override
     public LinkResponse addSubscription(Long tgChatId, SubscriptionRequestDto dto) {
         log.atInfo()
-            .setMessage("Поступил запрос на добавление ссылки на отслеживание")
-            .addKeyValue("Link", dto.getLink())
-            .addKeyValue("ChatID", tgChatId)
-            .log();
+                .setMessage("Поступил запрос на добавление ссылки на отслеживание")
+                .addKeyValue("Link", dto.getLink())
+                .addKeyValue("ChatID", tgChatId)
+                .log();
 
         return linkService.save(tgChatId, dto);
     }
@@ -30,9 +30,9 @@ public class SubscriptionController implements SubscriptionApi {
     @Override
     public ListLinksResponse getSubscription(Long tgChatId) {
         log.atInfo()
-            .setMessage("Поступил запрос на получение списка ссылок")
-            .addKeyValue("ChatID", tgChatId)
-            .log();
+                .setMessage("Поступил запрос на получение списка ссылок")
+                .addKeyValue("ChatID", tgChatId)
+                .log();
 
         return linkService.getAllLinks(tgChatId);
     }
@@ -40,10 +40,10 @@ public class SubscriptionController implements SubscriptionApi {
     @Override
     public LinkResponse deleteSubscription(Long tgChatId, String link) {
         log.atInfo()
-            .setMessage("Поступил запрос на удаление подписки")
-            .addKeyValue("ChatID", tgChatId)
-            .addKeyValue("Link", link)
-            .log();
+                .setMessage("Поступил запрос на удаление подписки")
+                .addKeyValue("ChatID", tgChatId)
+                .addKeyValue("Link", link)
+                .log();
 
         return linkService.delete(tgChatId, link);
     }

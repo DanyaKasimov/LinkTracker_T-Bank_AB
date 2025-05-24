@@ -36,7 +36,8 @@ public interface SubscriptionApi {
             })
     @PostMapping("/links")
     @ResponseStatus(HttpStatus.OK)
-    LinkResponse addSubscription(final @RequestParam @Valid Long tgChatId, final @Valid @RequestBody SubscriptionRequestDto dto);
+    LinkResponse addSubscription(
+            final @RequestParam @Valid Long tgChatId, final @Valid @RequestBody SubscriptionRequestDto dto);
 
     @Operation(description = "Получение списка подписок")
     @ApiResponses(
@@ -60,32 +61,31 @@ public interface SubscriptionApi {
     @ResponseStatus(HttpStatus.OK)
     ListLinksResponse getSubscription(final @RequestParam @Valid Long tgChatId);
 
-
     @Operation(description = "Убрать отслеживание ссылки")
     @ApiResponses(
-        value = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Ссылка успешно убрана",
-                content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ListLinksResponse.class))),
-            @ApiResponse(
-                responseCode = "400",
-                description = "Некорректные параметры запроса",
-                content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(
-                responseCode = "404",
-                description = "Ссылка не найдена",
-                content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ApiErrorResponse.class))),
-        })
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Ссылка успешно убрана",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ListLinksResponse.class))),
+                @ApiResponse(
+                        responseCode = "400",
+                        description = "Некорректные параметры запроса",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ApiErrorResponse.class))),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Ссылка не найдена",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = ApiErrorResponse.class))),
+            })
     @DeleteMapping("/links")
     @ResponseStatus(HttpStatus.OK)
     LinkResponse deleteSubscription(final @RequestParam @Valid Long tgChatId, final @RequestBody String link);

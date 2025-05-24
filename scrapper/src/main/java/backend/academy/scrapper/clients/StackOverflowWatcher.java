@@ -1,17 +1,16 @@
 package backend.academy.scrapper.clients;
 
 import backend.academy.scrapper.dto.StackOverflowAnswer;
-import backend.academy.scrapper.service.NotificationService;
 import backend.academy.scrapper.service.LinkService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
+import backend.academy.scrapper.service.NotificationService;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -37,7 +36,7 @@ public class StackOverflowWatcher {
         ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
 
         for (List<String> partition : partitions) {
-            executor.submit(() -> partition.forEach(this::processLink));
+            var unused = executor.submit(() -> partition.forEach(this::processLink));
         }
 
         executor.shutdown();
@@ -67,24 +66,18 @@ public class StackOverflowWatcher {
             Optional<StackOverflowAnswer> response = stackOverflowClient.getLatestAnswerOrComment(link);
             Integer storedAnswerId = lastAnswerIds.get(link);
 
-            response.ifPresentOrElse(
-                answer -> handleAnswer(link, answer, storedAnswerId),
-                () -> handleNoAnswer(link)
-            );
+            response.ifPresentOrElse(answer -> handleAnswer(link, answer, storedAnswerId), () -> handleNoAnswer(link));
         } catch (Exception e) {
             log.atError()
-                .setMessage("Ошибка при обработке ссылки StackOverflow")
-                .addKeyValue("link", link)
-                .addKeyValue("error", e.getMessage())
-                .log();
+                    .setMessage("Ошибка при обработке ссылки StackOverflow")
+                    .addKeyValue("link", link)
+                    .addKeyValue("error", e.getMessage())
+                    .log();
         }
     }
 
     private void handleNoAnswer(String link) {
-        log.atInfo()
-            .setMessage("Ответов пока нет")
-            .addKeyValue("link", link)
-            .log();
+        log.atInfo().setMessage("Ответов пока нет").addKeyValue("link", link).log();
         lastAnswerIds.putIfAbsent(link, 0);
     }
 
@@ -104,11 +97,11 @@ public class StackOverflowWatcher {
 
     private void logNewAnswer(String link, StackOverflowAnswer answer, String message) {
         log.atInfo()
-            .setMessage(message)
-            .addKeyValue("answerId", answer.answerId())
-            .addKeyValue("title", answer.questionTitle())
-            .addKeyValue("username", answer.username())
-            .addKeyValue("link", link)
-            .log();
+                .setMessage(message)
+                .addKeyValue("answerId", answer.answerId())
+                .addKeyValue("title", answer.questionTitle())
+                .addKeyValue("username", answer.username())
+                .addKeyValue("link", link)
+                .log();
     }
 }

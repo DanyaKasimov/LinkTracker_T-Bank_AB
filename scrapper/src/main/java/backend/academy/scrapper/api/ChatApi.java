@@ -33,7 +33,6 @@ public interface ChatApi {
     @ResponseStatus(HttpStatus.OK)
     void registerChat(final @PathVariable @Valid Long id);
 
-
     @Operation(description = "Удаление чата")
     @ApiResponses(
             value = {

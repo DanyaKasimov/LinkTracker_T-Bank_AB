@@ -3,11 +3,13 @@ package backend.academy.scrapper.repository.adapters;
 import backend.academy.scrapper.Model.Chat;
 import backend.academy.scrapper.repository.ChatRepository;
 import backend.academy.scrapper.repository.jpa.ChatJpaRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "ORM")
 @RequiredArgsConstructor
 public class OrmChatRepositoryAdapter implements ChatRepository {
 

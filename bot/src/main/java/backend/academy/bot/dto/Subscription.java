@@ -1,10 +1,9 @@
 package backend.academy.bot.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -17,13 +16,10 @@ public class Subscription {
 
     @Override
     public String toString() {
-        return String.format("""
-            Link: %s
-            Tags: %s
-            Filters: %s
-            """,
-            link,
-            tags == null ? "-" : String.join(", ", tags),
-            filters == null ? "-" : String.join(", ", filters));
+        return String.format(
+                "Link: %s%nTags: %s%nFilters: %s",
+                link,
+                tags == null || tags.isEmpty() ? "-" : String.join(", ", tags),
+                filters == null || filters.isEmpty() ? "-" : String.join(", ", filters));
     }
 }

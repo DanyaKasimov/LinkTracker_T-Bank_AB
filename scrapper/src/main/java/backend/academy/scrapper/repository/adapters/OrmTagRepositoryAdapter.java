@@ -4,12 +4,14 @@ import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.Model.Tag;
 import backend.academy.scrapper.repository.TagRepository;
 import backend.academy.scrapper.repository.jpa.TagJpaRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "ORM")
 @RequiredArgsConstructor
 public class OrmTagRepositoryAdapter implements TagRepository {
 
@@ -54,5 +56,4 @@ public class OrmTagRepositoryAdapter implements TagRepository {
     public void deleteAllByLinkIn(Collection<Link> links) {
         jpaRepository.deleteAllByLinkIn(links);
     }
-
 }

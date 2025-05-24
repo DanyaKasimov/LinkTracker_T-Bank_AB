@@ -34,6 +34,7 @@ public class StopCommand implements Command {
             return;
         }
         stateHandler.deleteActive(chatId);
-        messageSender.send(chatId, "Бот отключен. Введите " + BotCommand.START.getCommand() + " для повторного включения.");
+        messageSender.send(
+                chatId, "Бот отключен. Введите " + BotCommand.START.getCommand() + " для повторного включения.");
     }
 }

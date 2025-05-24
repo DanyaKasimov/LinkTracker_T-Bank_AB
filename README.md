@@ -1,5 +1,15 @@
-![Build](https://github.com/central-university-dev/backend-academy-2025-spring-template/actions/workflows/build.yaml/badge.svg)
-
 # Link Tracker
 
-Запуск "просто из IDE", ничего прочего запускать не требуется, только Bot и Scrapper
+## Запуск
+
+### Kafka/Redis/PostgreSQL
+
+Для запуска Kafka/Redis/PostgreSQL нужно запустить ```docker-compose.yml``` из IDE,
+
+либо выполнить команду в терминале ```docker-compose up```.
+
+### Scrapper/Bot
+
+Нужно заполнить .env файл, указав все необходимые параметры.
+
+Запуск производится из IDE.

@@ -4,14 +4,15 @@ import backend.academy.scrapper.Model.Chat;
 import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.jpa.LinksJpaRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 
 @Repository
+@ConditionalOnProperty(name = "database.type", havingValue = "ORM")
 @RequiredArgsConstructor
 public class OrmLinksRepositoryAdapter implements LinksRepository {
 

@@ -1,6 +1,5 @@
 package backend.academy.bot;
 
-
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,8 @@ public class TelegramBotService {
 
     private final MessageSender messageSender;
 
-    public TelegramBotService(BotCore botCore, CommandExecutor commandExecutor, StateHandler stateHandler, MessageSender messageSender) {
+    public TelegramBotService(
+            BotCore botCore, CommandExecutor commandExecutor, StateHandler stateHandler, MessageSender messageSender) {
         this.commandHandler = commandExecutor;
         this.messageSender = messageSender;
         this.stateHandler = stateHandler;
@@ -41,11 +41,10 @@ public class TelegramBotService {
             }
         } catch (Exception e) {
             log.atError()
-                .setMessage("Непредвиденная ошибка")
-                .addKeyValue("error", e.getMessage())
-                .log();
+                    .setMessage("Непредвиденная ошибка")
+                    .addKeyValue("error", e.getMessage())
+                    .log();
             messageSender.send(chatId, "Произошла ошибка. Попробуйте снова.");
         }
     }
-
 }

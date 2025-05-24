@@ -8,7 +8,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 @Configuration
 public class ValidationConfig {
     @Bean
-    public MessageSource messageSource(){
+    public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setBasename("classpath:messages");
         messageSource.setDefaultEncoding("UTF-8");

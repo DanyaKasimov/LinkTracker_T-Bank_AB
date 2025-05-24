@@ -1,8 +1,5 @@
 package backend.academy.bot.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;

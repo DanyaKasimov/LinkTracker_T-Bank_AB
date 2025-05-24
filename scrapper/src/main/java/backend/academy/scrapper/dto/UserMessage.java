@@ -1,4 +1,3 @@
 package backend.academy.scrapper.dto;
 
-public interface UserMessage {
-}
+public interface UserMessage {}

@@ -1,8 +1,8 @@
 package backend.academy.scrapper.accessor;
 
+import backend.academy.scrapper.exceptions.InvalidDataException;
 import java.net.URI;
 import java.util.Map;
-import backend.academy.scrapper.exceptions.InvalidDataException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -29,27 +29,30 @@ public class RestAccessor {
         this.restClient = RestClient.create();
     }
 
-    public <T> ResponseEntity<T> getApiAccess(String path, ParameterizedTypeReference<T> responseType,
-                                           Map<String, String> queryParams,
-                                           Map<String, String> headers) {
+    public <T> ResponseEntity<T> getApiAccess(
+            String path,
+            ParameterizedTypeReference<T> responseType,
+            Map<String, String> queryParams,
+            Map<String, String> headers) {
         try {
             URI uri = buildUri(path, queryParams);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             headers.forEach(httpHeaders::set);
 
-            return restClient.get()
-                .uri(uri)
-                .headers(h -> h.addAll(httpHeaders))
-                .retrieve()
-                .toEntity(responseType);
+            return restClient
+                    .get()
+                    .uri(uri)
+                    .headers(h -> h.addAll(httpHeaders))
+                    .retrieve()
+                    .toEntity(responseType);
         } catch (RestClientResponseException e) {
             log.atError()
-                .setMessage("Ошибка запроса к API")
-                .addKeyValue("path", path)
-                .addKeyValue("status", e.getStatusCode())
-                .addKeyValue("errorMessage", e.getMessage())
-                .log();
+                    .setMessage("Ошибка запроса к API")
+                    .addKeyValue("path", path)
+                    .addKeyValue("status", e.getStatusCode())
+                    .addKeyValue("errorMessage", e.getMessage())
+                    .log();
             if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
                 throw new InvalidDataException("Ресурс не найден.");
             }
@@ -63,29 +66,30 @@ public class RestAccessor {
     public <T, R> ResponseEntity<R> postBot(String path, T requestBody, Class<R> responseType) {
         try {
             return restClient
-                .post()
-                .uri(BOT_URL + path)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(requestBody)
-                .retrieve()
-                .toEntity(responseType);
+                    .post()
+                    .uri(BOT_URL + path)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .body(requestBody)
+                    .retrieve()
+                    .toEntity(responseType);
         } catch (Exception e) {
             log.atError()
-                .setMessage("Ошибка отправки POST-запроса")
-                .addKeyValue("url", BOT_URL + path)
-                .addKeyValue("errorMessage", e.getMessage())
-                .log();
+                    .setMessage("Ошибка отправки POST-запроса")
+                    .addKeyValue("url", BOT_URL + path)
+                    .addKeyValue("errorMessage", e.getMessage())
+                    .log();
             throw new RuntimeException(e.getMessage());
         }
     }
 
     private URI buildUri(String path, Map<String, String> queryParams) {
         return UriComponentsBuilder.fromUriString(path)
-            .queryParams(queryParams.entrySet().stream()
-                .collect(LinkedMultiValueMap::new,
-                    (map, entry) -> map.add(entry.getKey(), entry.getValue()),
-                    LinkedMultiValueMap::putAll))
-            .build()
-            .toUri();
+                .queryParams(queryParams.entrySet().stream()
+                        .collect(
+                                LinkedMultiValueMap::new,
+                                (map, entry) -> map.add(entry.getKey(), entry.getValue()),
+                                LinkedMultiValueMap::putAll))
+                .build()
+                .toUri();
     }
 }

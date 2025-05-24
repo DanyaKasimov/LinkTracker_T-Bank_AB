@@ -24,5 +24,4 @@ public interface LinksRepository {
     List<Link> findAllByName(String name);
 
     void deleteAll(Collection<Link> links);
-
 }

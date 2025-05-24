@@ -1,23 +1,21 @@
 package backend.academy.scrapper.clients;
 
+import backend.academy.scrapper.accessor.RestAccessor;
 import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.config.UrlConfig;
-import backend.academy.scrapper.accessor.RestAccessor;
 import backend.academy.scrapper.constants.GitHubEndpoints;
 import backend.academy.scrapper.dto.GitHubUpdate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -44,13 +42,11 @@ public class GitHubClient {
     private static final String BODY_FIELD = "body";
 
     public Optional<GitHubUpdate> getLatestCommit(String path) {
-        return buildApiUrl(path, GitHubEndpoints.COMMIT.getDescription())
-            .flatMap(this::extractCommitInfo);
+        return buildApiUrl(path, GitHubEndpoints.COMMIT.getDescription()).flatMap(this::extractCommitInfo);
     }
 
     public Optional<GitHubUpdate> getLatestPRIssue(String path, GitHubEndpoints endpoint) {
-        return buildApiUrl(path, endpoint.getDescription())
-            .flatMap(this::extractItemInfo);
+        return buildApiUrl(path, endpoint.getDescription()).flatMap(this::extractItemInfo);
     }
 
     private Optional<GitHubUpdate> extractCommitInfo(String apiUrl) {
@@ -63,7 +59,8 @@ public class GitHubClient {
             String preview = trimPreview(message);
             String username = asString(author.get(NAME_FIELD));
             String createdAt = asString(author.get(DATE_FIELD));
-            String title = message.split("\\n")[0];
+            int index = message.indexOf('\n');
+            String title = index == -1 ? message : message.substring(0, index);
 
             return new GitHubUpdate(sha, title, username, createdAt, preview);
         });
@@ -83,24 +80,21 @@ public class GitHubClient {
     }
 
     private Optional<Map<String, Object>> getFirstItem(String apiUrl) {
-        ResponseEntity<List<Map<String, Object>>> response = sendRequest(apiUrl);
-        if (response == null || CollectionUtils.isEmpty(response.getBody())) return Optional.empty();
-        return Optional.ofNullable(response.getBody().getFirst());
+        return Optional.ofNullable(sendRequest(apiUrl))
+                .map(ResponseEntity::getBody)
+                .filter(body -> !CollectionUtils.isEmpty(body))
+                .map(List::getFirst);
     }
 
     private ResponseEntity<List<Map<String, Object>>> sendRequest(String apiUrl) {
-        Map<String, String> headers = Map.of(
-            "Authorization", "Bearer " + config.githubToken(),
-            "Accept", "application/vnd.github.v3+json"
-        );
+        Map<String, String> headers =
+                Map.of("Authorization", "Bearer " + config.githubToken(), "Accept", "application/vnd.github.v3+json");
 
         return restAccessor.getApiAccess(
-            apiUrl,
-            new ParameterizedTypeReference<>() {
-            },
-            Map.of("per_page", "1", "sort", "created", "direction", "desc"),
-            headers
-        );
+                apiUrl,
+                new ParameterizedTypeReference<>() {},
+                Map.of("per_page", "1", "sort", "created", "direction", "desc"),
+                headers);
     }
 
     public Boolean urlIsValid(String url) {
@@ -109,27 +103,26 @@ public class GitHubClient {
             apiUrl = buildApiUrl(url, GitHubEndpoints.COMMIT.getDescription());
 
             if (apiUrl.isPresent()) {
-                ResponseEntity<List<Map<String, Object>>> response = sendRequest(apiUrl.get());
+                ResponseEntity<List<Map<String, Object>>> response = sendRequest(apiUrl.orElseThrow());
                 return response != null && !CollectionUtils.isEmpty(response.getBody());
             }
 
             return false;
         } catch (Exception e) {
             log.atDebug()
-                .setMessage("Не удалось проверить GitHub URL")
-                .addKeyValue("apiUrl", apiUrl.orElse("empty"))
-                .addKeyValue("error", e.getMessage())
-                .log();
+                    .setMessage("Не удалось проверить GitHub URL")
+                    .addKeyValue("apiUrl", apiUrl.orElse("empty"))
+                    .addKeyValue("error", e.getMessage())
+                    .log();
             return false;
         }
     }
 
-
     private Optional<String> buildApiUrl(String originalUrl, String endpointSuffix) {
         Matcher matcher = GITHUB_URL_PATTERN.matcher(originalUrl);
         if (matcher.find()) {
-            return Optional.of(String.format("%s/repos/%s/%s%s",
-                urlConfig.githubUrl(), matcher.group(1), matcher.group(2), endpointSuffix));
+            return Optional.of(String.format(
+                    "%s/repos/%s/%s%s", urlConfig.githubUrl(), matcher.group(1), matcher.group(2), endpointSuffix));
         }
         return Optional.empty();
     }
