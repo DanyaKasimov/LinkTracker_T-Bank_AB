@@ -1,17 +1,14 @@
-package backend.academy.scrapper.dto;
+package backend.academy.scrapper.dto.request;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class LinkResponse {
-    private String id;
+@AllArgsConstructor
+public class SubscriptionRequestDto {
     private String link;
     private List<String> tags;
     private List<String> filters;

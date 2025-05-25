@@ -1,6 +1,6 @@
 package backend.academy.scrapper.controller;
 
-import backend.academy.scrapper.dto.ApiErrorResponse;
+import backend.academy.scrapper.dto.response.ApiErrorResponse;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -31,12 +31,7 @@ public class ExceptionHandlerController {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiErrorResponse> handleRuntimeExceptions(RuntimeException ex) {
         HttpStatus status = resolveResponseStatus(ex);
-
-        log.atWarn()
-                .setMessage("Обработка исключения")
-                .addKeyValue("type", ex.getClass().getSimpleName())
-                .addKeyValue("message", ex.getMessage())
-                .log();
+        log.warn("Обработка исключения. Type: {}. Message: {}", ex.getClass().getSimpleName(), ex.getMessage());
 
         return buildErrorResponse(status, ex.getMessage(), ex);
     }

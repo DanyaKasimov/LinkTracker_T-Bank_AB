@@ -2,6 +2,10 @@
 
 ## Запуск
 
+### Сборка
+
+Для сборки проекта введите в терминале команду ```sh script.sh```
+
 ### Kafka/Redis/PostgreSQL
 
 Для запуска Kafka/Redis/PostgreSQL нужно запустить ```docker-compose.yml``` из IDE,

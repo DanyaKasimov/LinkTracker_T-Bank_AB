@@ -1,6 +1,6 @@
 package backend.academy.scrapper.repository.jpa;
 
-import backend.academy.scrapper.Model.Chat;
+import backend.academy.scrapper.model.Chat;
 import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.jpa.repository.JpaRepository;

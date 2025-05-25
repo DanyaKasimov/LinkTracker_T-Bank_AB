@@ -1,4 +1,4 @@
-package backend.academy.scrapper.Model;
+package backend.academy.scrapper.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,12 +14,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "tags")
+@Table(name = "filters")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Tag {
+public class Filter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

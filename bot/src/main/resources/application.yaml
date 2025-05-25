@@ -1,5 +1,31 @@
 app:
-  telegram-token: ${TELEGRAM_TOKEN}
+  telegram:
+    token: ${TELEGRAM_TOKEN}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    group: bot-group
+    topics:
+      notification: notification
+  redis:
+    duration: 30
+  scrapper:
+    url: http://localhost:8100
+  http:
+    timeout:
+      connect: 2s
+      response: 5s
+    retry:
+      max-attempts: 5
+      backoff-millis: 1000
+      status-codes:
+        - TOO_MANY_REQUESTS
+        - INTERNAL_SERVER_ERROR
+        - BAD_GATEWAY
+        - SERVICE_UNAVAILABLE
+    rate-limiting:
+      enabled: true
+      requests: 10
+      seconds: 60
 
 spring:
   application:
@@ -14,15 +40,6 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-
-kafka:
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-  group: bot-group
-  topics:
-    notification: notification
-
-redis:
-  duration: 30
 
 server:
   port: 8081

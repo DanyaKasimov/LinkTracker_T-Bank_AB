@@ -15,7 +15,7 @@ public class BotCore {
     private final TelegramBot bot;
 
     public BotCore(BotConfig config) {
-        this.bot = new TelegramBot(config.telegramToken());
+        this.bot = new TelegramBot(config.telegram().token());
     }
 
     @PostConstruct

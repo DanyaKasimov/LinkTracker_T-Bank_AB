@@ -1,4 +1,4 @@
-package backend.academy.scrapper.dto;
+package backend.academy.scrapper.dto.response;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

@@ -2,7 +2,6 @@ package backend.academy.scrapper.clients;
 
 import backend.academy.scrapper.accessor.RestAccessor;
 import backend.academy.scrapper.config.ScrapperConfig;
-import backend.academy.scrapper.config.UrlConfig;
 import backend.academy.scrapper.constants.GitHubEndpoints;
 import backend.academy.scrapper.dto.GitHubUpdate;
 import java.util.List;
@@ -23,10 +22,10 @@ import org.springframework.util.CollectionUtils;
 public class GitHubClient {
 
     private final ScrapperConfig config;
-    private final UrlConfig urlConfig;
     private final RestAccessor restAccessor;
 
-    private static final Pattern GITHUB_URL_PATTERN = Pattern.compile("https://github\\.com/([^/]+)/([^/]+)");
+    private static final Pattern GITHUB_URL_PATTERN =
+            Pattern.compile("^https://github\\.com/([^/]+)/([^/]+?)(?:\\.git)?(?:/.*)?$");
     private static final int PREVIEW_LIMIT = 200;
 
     private static final String COMMIT_FIELD = "commit";
@@ -49,33 +48,56 @@ public class GitHubClient {
         return buildApiUrl(path, endpoint.getDescription()).flatMap(this::extractItemInfo);
     }
 
+    public boolean urlIsValid(String url) {
+        Optional<String> apiUrlOpt = buildApiUrl(url, GitHubEndpoints.COMMIT.getDescription());
+        if (apiUrlOpt.isEmpty()) return false;
+        try {
+            ResponseEntity<List<Map<String, Object>>> response = sendRequest(apiUrlOpt.orElseThrow());
+            return response != null && !CollectionUtils.isEmpty(response.getBody());
+        } catch (Exception e) {
+            log.debug(
+                    "Не удалось проверить GitHub URL, apiUrl={}, error={}", apiUrlOpt.orElse("empty"), e.getMessage());
+            return false;
+        }
+    }
+
     private Optional<GitHubUpdate> extractCommitInfo(String apiUrl) {
-        return getFirstItem(apiUrl).map(commit -> {
-            String sha = asString(commit.get(SHA_FIELD));
-            Map<String, Object> commitData = asMap(commit.get(COMMIT_FIELD));
-            Map<String, Object> author = asMap(commitData.get(AUTHOR_FIELD));
-
-            String message = asString(commitData.get(MESSAGE_FIELD));
+        return getFirstItem(apiUrl).map(item -> {
+            String sha = asString(item, SHA_FIELD);
+            Map<String, Object> commit = asMap(item.get(COMMIT_FIELD));
+            Map<String, Object> author = asMap(commit.get(AUTHOR_FIELD));
+            String message = asString(commit, MESSAGE_FIELD);
             String preview = trimPreview(message);
-            String username = asString(author.get(NAME_FIELD));
-            String createdAt = asString(author.get(DATE_FIELD));
-            int index = message.indexOf('\n');
-            String title = index == -1 ? message : message.substring(0, index);
+            String username = asString(author, NAME_FIELD);
+            String createdAt = asString(author, DATE_FIELD);
+            String title = extractTitle(message);
 
-            return new GitHubUpdate(sha, title, username, createdAt, preview);
+            return GitHubUpdate.builder()
+                    .sha(sha)
+                    .title(title)
+                    .username(username)
+                    .createdAt(createdAt)
+                    .preview(preview)
+                    .build();
         });
     }
 
     private Optional<GitHubUpdate> extractItemInfo(String apiUrl) {
         return getFirstItem(apiUrl).map(item -> {
-            String title = asString(item.get(TITLE_FIELD));
+            String title = asString(item, TITLE_FIELD);
             Map<String, Object> user = asMap(item.get(USER_FIELD));
-            String username = asString(user.get(LOGIN_FIELD));
-            String createdAt = asString(item.get(CREATED_AT_FIELD));
-            String body = asString(item.getOrDefault(BODY_FIELD, ""));
+            String username = asString(user, LOGIN_FIELD);
+            String createdAt = asString(item, CREATED_AT_FIELD);
+            String body = asString(item, BODY_FIELD);
             String preview = trimPreview(body);
 
-            return new GitHubUpdate("", title, username, createdAt, preview);
+            return GitHubUpdate.builder()
+                    .sha("")
+                    .title(title)
+                    .username(username)
+                    .createdAt(createdAt)
+                    .preview(preview)
+                    .build();
         });
     }
 
@@ -87,9 +109,11 @@ public class GitHubClient {
     }
 
     private ResponseEntity<List<Map<String, Object>>> sendRequest(String apiUrl) {
-        Map<String, String> headers =
-                Map.of("Authorization", "Bearer " + config.githubToken(), "Accept", "application/vnd.github.v3+json");
-
+        Map<String, String> headers = Map.of(
+                "Accept",
+                "application/vnd.github.v3+json",
+                "Authorization",
+                "Bearer " + config.github().token());
         return restAccessor.getApiAccess(
                 apiUrl,
                 new ParameterizedTypeReference<>() {},
@@ -97,46 +121,33 @@ public class GitHubClient {
                 headers);
     }
 
-    public Boolean urlIsValid(String url) {
-        Optional<String> apiUrl = Optional.empty();
-        try {
-            apiUrl = buildApiUrl(url, GitHubEndpoints.COMMIT.getDescription());
-
-            if (apiUrl.isPresent()) {
-                ResponseEntity<List<Map<String, Object>>> response = sendRequest(apiUrl.orElseThrow());
-                return response != null && !CollectionUtils.isEmpty(response.getBody());
-            }
-
-            return false;
-        } catch (Exception e) {
-            log.atDebug()
-                    .setMessage("Не удалось проверить GitHub URL")
-                    .addKeyValue("apiUrl", apiUrl.orElse("empty"))
-                    .addKeyValue("error", e.getMessage())
-                    .log();
-            return false;
-        }
-    }
-
     private Optional<String> buildApiUrl(String originalUrl, String endpointSuffix) {
         Matcher matcher = GITHUB_URL_PATTERN.matcher(originalUrl);
-        if (matcher.find()) {
+        if (matcher.matches()) {
             return Optional.of(String.format(
-                    "%s/repos/%s/%s%s", urlConfig.githubUrl(), matcher.group(1), matcher.group(2), endpointSuffix));
+                    "%s/repos/%s/%s%s", config.github().apiUrl(), matcher.group(1), matcher.group(2), endpointSuffix));
         }
         return Optional.empty();
     }
 
-    private String trimPreview(String text) {
+    private static String trimPreview(String text) {
+        if (text == null) return "";
         return text.length() > PREVIEW_LIMIT ? text.substring(0, PREVIEW_LIMIT) : text;
     }
 
+    private static String extractTitle(String message) {
+        if (message == null) return "";
+        int idx = message.indexOf('\n');
+        return idx == -1 ? message : message.substring(0, idx);
+    }
+
     @SuppressWarnings("unchecked")
-    private Map<String, Object> asMap(Object obj) {
+    private static Map<String, Object> asMap(Object obj) {
         return obj instanceof Map ? (Map<String, Object>) obj : Map.of();
     }
 
-    private String asString(Object obj) {
-        return obj != null ? obj.toString() : "";
+    private static String asString(Map<String, Object> map, String field) {
+        Object val = map.get(field);
+        return val == null ? "" : val.toString();
     }
 }

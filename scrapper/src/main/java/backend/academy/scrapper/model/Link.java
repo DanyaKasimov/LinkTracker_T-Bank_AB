@@ -1,4 +1,4 @@
-package backend.academy.scrapper.Model;
+package backend.academy.scrapper.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
