@@ -67,20 +67,17 @@ public class RateLimitingFilter implements Filter {
         public RequestWindow(int windowSeconds) {
             this.windowSeconds = windowSeconds;
             this.windowStartEpoch = Instant.now().getEpochSecond();
-            this.counter = 0;
         }
 
         public synchronized boolean tryRequest(int maxRequests) {
             long now = Instant.now().getEpochSecond();
-            if (now - windowStartEpoch >= windowSeconds) {
+
+            if (now >= windowStartEpoch + windowSeconds) {
                 windowStartEpoch = now;
                 counter = 0;
             }
-            if (counter < maxRequests) {
-                counter++;
-                return true;
-            }
-            return false;
+
+            return counter++ < maxRequests;
         }
     }
 }

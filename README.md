@@ -4,7 +4,23 @@
 
 ### Сборка
 
-Для сборки проекта введите в терминале команду ```sh script.sh```
+Для сборки проекта выполните команду
+
+```bash
+
+mvn compile -am spotless:check modernizer:modernizer spotbugs:check pmd:check pmd:cpd-check
+
+mvn clean install
+
+```
+
+или
+
+Для Mac/Linux введите в терминале, для Windows в GitBash, команду:
+
+```
+sh script.sh
+```
 
 ### Kafka/Redis/PostgreSQL
 

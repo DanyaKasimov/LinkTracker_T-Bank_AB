@@ -37,6 +37,16 @@ public class StackOverflowClient {
     private static final String TITLE_FIELD = "title";
     private static final String ANSWER_ID_FIELD = "answer_id";
 
+    private static final String PARAM_ORDER = "order";
+    private static final String PARAM_SORT = "sort";
+    private static final String PARAM_SITE = "site";
+    private static final String PARAM_KEY = "key";
+    private static final String PARAM_ACCESS_TOKEN = "access_token";
+
+    private static final String VALUE_ORDER_DESC = "desc";
+    private static final String VALUE_SORT_CREATION = "creation";
+    private static final String VALUE_SITE_STACKOVERFLOW = "stackoverflow";
+
     public Optional<StackOverflowAnswer> getLatestAnswerOrComment(String originalUrl) {
         return buildApiUrl(originalUrl).flatMap(this::getFirstItem).map(item -> {
             Integer answerId = asInt(item, ANSWER_ID_FIELD);
@@ -93,11 +103,11 @@ public class StackOverflowClient {
 
     private ResponseEntity<Map<String, Object>> sendRequest(String apiUrl) {
         var params = new HashMap<String, String>();
-        params.put("order", "desc");
-        params.put("sort", "creation");
-        params.put("site", "stackoverflow");
-        params.put("key", config.stackOverflow().key());
-        params.put("access_token", config.stackOverflow().accessToken());
+        params.put(PARAM_ORDER, VALUE_ORDER_DESC);
+        params.put(PARAM_SORT, VALUE_SORT_CREATION);
+        params.put(PARAM_SITE, VALUE_SITE_STACKOVERFLOW);
+        params.put(PARAM_KEY, config.stackOverflow().key());
+        params.put(PARAM_ACCESS_TOKEN, config.stackOverflow().accessToken());
 
         return restAccessor.getApiAccess(apiUrl, new ParameterizedTypeReference<>() {}, params, Map.of());
     }

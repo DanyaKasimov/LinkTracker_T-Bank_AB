@@ -3,9 +3,6 @@ package backend.academy.scrapper.service.impl.notification;
 import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.dto.UserMessage;
 import backend.academy.scrapper.dto.response.LinkUpdateDto;
-import backend.academy.scrapper.exceptions.InvalidDataException;
-import backend.academy.scrapper.exceptions.JsonExceptions;
-import backend.academy.scrapper.exceptions.KafkaException;
 import backend.academy.scrapper.service.LinkService;
 import backend.academy.scrapper.service.NotificationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,15 +26,15 @@ public class NotificationKafkaServiceImpl implements NotificationService {
     public void sendNotification(String linkName, UserMessage message) {
         log.info("Поступил запрос на отправку уведомлений через Kafka.");
 
-        LinkUpdateDto updateDto = validateAndBuildUpdateDto(linkService, linkName, message, log);
-        if (updateDto == null) return;
+        LinkUpdateDto updateDto = validateAndBuildUpdateDto(linkService, linkName, message, log)
+                .orElseThrow(() -> new RuntimeException("Ошибка создания сообщения об обновлении."));
 
         String payload = createPayload(updateDto);
         String topic = scrapperConfig.kafka().topics().notification();
         try {
             kafkaTemplate.send(topic, payload).get();
         } catch (Exception e) {
-            throw new KafkaException("Ошибка Kafka: " + e.getMessage());
+            throw new RuntimeException("Ошибка Kafka: " + e.getMessage());
         }
     }
 
@@ -45,7 +42,7 @@ public class NotificationKafkaServiceImpl implements NotificationService {
         try {
             return objectMapper.writeValueAsString(dto);
         } catch (JsonProcessingException e) {
-            throw new JsonExceptions(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 }

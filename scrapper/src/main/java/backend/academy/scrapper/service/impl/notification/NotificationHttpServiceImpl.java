@@ -20,8 +20,8 @@ public class NotificationHttpServiceImpl implements NotificationService {
 
     @Override
     public void sendNotification(String linkName, UserMessage message) {
-        LinkUpdateDto updateDto = validateAndBuildUpdateDto(linkService, linkName, message, log);
-        if (updateDto == null) return;
+        LinkUpdateDto updateDto = validateAndBuildUpdateDto(linkService, linkName, message, log)
+                .orElseThrow(() -> new RuntimeException("Ошибка создания сообщения об обновлении."));
 
         restAccessor.postBot("/updates", updateDto, new ParameterizedTypeReference<String>() {});
     }

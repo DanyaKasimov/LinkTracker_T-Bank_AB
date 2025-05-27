@@ -40,6 +40,18 @@ public class GitHubClient {
     private static final String CREATED_AT_FIELD = "created_at";
     private static final String BODY_FIELD = "body";
 
+    private static final String QUERY_PER_PAGE = "per_page";
+    private static final String QUERY_SORT = "sort";
+    private static final String QUERY_DIRECTION = "direction";
+    private static final String DEFAULT_PER_PAGE = "1";
+    private static final String DEFAULT_SORT = "created";
+    private static final String DEFAULT_DIRECTION = "desc";
+
+    private static final String HEADER_ACCEPT = "Accept";
+    private static final String HEADER_AUTHORIZATION = "Authorization";
+    private static final String MEDIA_TYPE_GITHUB_V3_JSON = "application/vnd.github.v3+json";
+    private static final String AUTH_BEARER_PREFIX = "Bearer ";
+
     public Optional<GitHubUpdate> getLatestCommit(String path) {
         return buildApiUrl(path, GitHubEndpoints.COMMIT.getDescription()).flatMap(this::extractCommitInfo);
     }
@@ -110,15 +122,16 @@ public class GitHubClient {
 
     private ResponseEntity<List<Map<String, Object>>> sendRequest(String apiUrl) {
         Map<String, String> headers = Map.of(
-                "Accept",
-                "application/vnd.github.v3+json",
-                "Authorization",
-                "Bearer " + config.github().token());
-        return restAccessor.getApiAccess(
-                apiUrl,
-                new ParameterizedTypeReference<>() {},
-                Map.of("per_page", "1", "sort", "created", "direction", "desc"),
-                headers);
+                HEADER_ACCEPT,
+                MEDIA_TYPE_GITHUB_V3_JSON,
+                HEADER_AUTHORIZATION,
+                AUTH_BEARER_PREFIX + config.github().token());
+
+        Map<String, String> queryParams = Map.of(
+                QUERY_PER_PAGE, DEFAULT_PER_PAGE,
+                QUERY_SORT, DEFAULT_SORT,
+                QUERY_DIRECTION, DEFAULT_DIRECTION);
+        return restAccessor.getApiAccess(apiUrl, new ParameterizedTypeReference<>() {}, queryParams, headers);
     }
 
     private Optional<String> buildApiUrl(String originalUrl, String endpointSuffix) {

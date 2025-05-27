@@ -65,16 +65,18 @@ public class GitHubWatcher extends AbstractWatcher<GitHubUpdate> {
                 gitHubClient
                         .getLatestPRIssue(link, GitHubEndpoints.PULL_REQUEST)
                         .ifPresent(update -> sendNotification(link, update));
-            } else if (link.contains("/issues/")) {
+                return;
+            }
+            if (link.contains("/issues/")) {
                 gitHubClient
                         .getLatestPRIssue(link, GitHubEndpoints.ISSUES)
                         .ifPresent(update -> sendNotification(link, update));
-            } else {
-                Optional<GitHubUpdate> update = gitHubClient.getLatestCommit(link);
-                String previous = lastCommitHashes.get(link);
-                update.ifPresentOrElse(
-                        u -> handleNewCommit(link, u, previous), () -> lastCommitHashes.putIfAbsent(link, ""));
+                return;
             }
+            Optional<GitHubUpdate> update = gitHubClient.getLatestCommit(link);
+            String previous = lastCommitHashes.get(link);
+            update.ifPresentOrElse(
+                    u -> handleNewCommit(link, u, previous), () -> lastCommitHashes.putIfAbsent(link, ""));
         } catch (Exception e) {
             log.error("Ошибка при обработке ссылки GitHub {}: {}", link, e.getMessage());
         }

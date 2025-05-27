@@ -16,12 +16,12 @@ import org.springframework.data.redis.serializer.*;
 @RequiredArgsConstructor
 public class RedisConfig {
 
-    private final BotConfig config;
+    private final BotConfig botConfig;
 
     @Bean
     public RedisCacheManager cacheManager(LettuceConnectionFactory connectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(this.config.redis().duration()))
+                .entryTtl(Duration.ofMinutes(botConfig.redis().duration()))
                 .serializeKeysWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
