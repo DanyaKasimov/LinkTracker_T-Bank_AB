@@ -7,7 +7,9 @@ import backend.academy.scrapper.service.impl.notification.NotificationDelegatorS
 import backend.academy.scrapper.service.impl.notification.NotificationHttpServiceImpl;
 import backend.academy.scrapper.service.impl.notification.NotificationKafkaServiceImpl;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 class NotificationUnitTest {
 
     @Test
