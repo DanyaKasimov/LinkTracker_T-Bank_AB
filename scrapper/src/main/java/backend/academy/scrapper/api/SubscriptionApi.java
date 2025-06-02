@@ -1,9 +1,9 @@
 package backend.academy.scrapper.api;
 
-import backend.academy.scrapper.dto.ApiErrorResponse;
-import backend.academy.scrapper.dto.LinkResponse;
-import backend.academy.scrapper.dto.ListLinksResponse;
-import backend.academy.scrapper.dto.SubscriptionRequestDto;
+import backend.academy.scrapper.dto.request.SubscriptionRequestDto;
+import backend.academy.scrapper.dto.response.ApiErrorResponse;
+import backend.academy.scrapper.dto.response.LinkResponse;
+import backend.academy.scrapper.dto.response.ListLinksResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

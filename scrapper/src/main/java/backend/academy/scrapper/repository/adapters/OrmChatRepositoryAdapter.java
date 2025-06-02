@@ -1,6 +1,6 @@
 package backend.academy.scrapper.repository.adapters;
 
-import backend.academy.scrapper.Model.Chat;
+import backend.academy.scrapper.model.Chat;
 import backend.academy.scrapper.repository.ChatRepository;
 import backend.academy.scrapper.repository.jpa.ChatJpaRepository;
 import java.util.Optional;

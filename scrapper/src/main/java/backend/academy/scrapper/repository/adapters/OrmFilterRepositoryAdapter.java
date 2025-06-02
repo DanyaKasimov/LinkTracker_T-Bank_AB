@@ -1,7 +1,7 @@
 package backend.academy.scrapper.repository.adapters;
 
-import backend.academy.scrapper.Model.Filter;
-import backend.academy.scrapper.Model.Link;
+import backend.academy.scrapper.model.Filter;
+import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.jpa.FilterJpaRepository;
 import java.util.Collection;

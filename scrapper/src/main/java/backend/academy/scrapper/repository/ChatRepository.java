@@ -1,6 +1,6 @@
 package backend.academy.scrapper.repository;
 
-import backend.academy.scrapper.Model.Chat;
+import backend.academy.scrapper.model.Chat;
 import java.util.Optional;
 
 public interface ChatRepository {

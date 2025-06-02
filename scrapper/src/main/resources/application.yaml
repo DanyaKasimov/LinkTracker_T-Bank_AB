@@ -1,24 +1,54 @@
 app:
-  github-token: ${GITHUB_TOKEN}
+  multithreading:
+    thread-count: 4
+    batch-size: 100
+  github:
+    token: ${GITHUB_TOKEN}
+    api-url: https://api.github.com
+    base-url: https://github.com/
   stackoverflow:
     key: ${SO_TOKEN_KEY}
     access-token: ${SO_ACCESS_TOKEN}
-
-url:
-  github-url: https://api.github.com
-  stackoverflow-url: https://api.stackexchange.com/2.3/questions/{id}/answer
-
+    api-url: https://api.stackexchange.com/2.3/questions/{id}/answer
+    base-url: https://stackoverflow.com/
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    topics:
+      notification: notification
+  http:
+    timeout:
+      connect: ${TIMEOUT_CONNECT:2s}
+      response: ${TIMEOUT_CONNECT:5s}
+    retry:
+      max-attempts: ${RETRY_ATTEMPTS:5}
+      backoff-millis: ${RETRY_MILLIS:1000}
+      status-codes:
+        - TOO_MANY_REQUESTS
+        - INTERNAL_SERVER_ERROR
+        - BAD_GATEWAY
+        - SERVICE_UNAVAILABLE
+    rate-limiting:
+      enabled: ${RATE_LIMITING_ENABLED:true}
+      requests: ${RATE_LIMITING_REQUESTS:10}
+      seconds: ${RATE_LIMITING_SECONDS:10}
+  bot:
+    url: ${BOT_URL:http://localhost:8081}
 
 database:
   type: ORM
 
 transport:
-  type: KAFKA
+  type: HTTP
 
-kafka:
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-  topics:
-    notification: notification
+resilience4j.circuitbreaker:
+  instances:
+    apiCircuitBreaker:
+      slidingWindowSize: 1
+      minimumNumberOfCalls: 1
+      failureRateThreshold: 100
+      permittedNumberOfCallsInHalfOpenState: 1
+      waitDurationInOpenState: 1s
+      slidingWindowType: COUNT_BASED
 
 spring:
   application:

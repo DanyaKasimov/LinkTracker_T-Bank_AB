@@ -1,7 +1,7 @@
 package backend.academy.scrapper.repository.jpa;
 
-import backend.academy.scrapper.Model.Link;
-import backend.academy.scrapper.Model.Tag;
+import backend.academy.scrapper.model.Link;
+import backend.academy.scrapper.model.Tag;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

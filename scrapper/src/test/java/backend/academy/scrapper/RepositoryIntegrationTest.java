@@ -2,10 +2,10 @@ package backend.academy.scrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import backend.academy.scrapper.Model.Chat;
-import backend.academy.scrapper.Model.Filter;
-import backend.academy.scrapper.Model.Link;
-import backend.academy.scrapper.Model.Tag;
+import backend.academy.scrapper.model.Chat;
+import backend.academy.scrapper.model.Filter;
+import backend.academy.scrapper.model.Link;
+import backend.academy.scrapper.model.Tag;
 import backend.academy.scrapper.repository.ChatRepository;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.LinksRepository;

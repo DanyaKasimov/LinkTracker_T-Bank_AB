@@ -1,7 +1,7 @@
 package backend.academy.scrapper.repository.jdbc;
 
-import backend.academy.scrapper.Model.Chat;
-import backend.academy.scrapper.Model.Link;
+import backend.academy.scrapper.model.Chat;
+import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.repository.LinksRepository;
 import jakarta.transaction.Transactional;
 import java.util.Collection;

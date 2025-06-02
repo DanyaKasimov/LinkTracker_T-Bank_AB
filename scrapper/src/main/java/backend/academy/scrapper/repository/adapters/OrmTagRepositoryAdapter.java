@@ -1,7 +1,7 @@
 package backend.academy.scrapper.repository.adapters;
 
-import backend.academy.scrapper.Model.Link;
-import backend.academy.scrapper.Model.Tag;
+import backend.academy.scrapper.model.Link;
+import backend.academy.scrapper.model.Tag;
 import backend.academy.scrapper.repository.TagRepository;
 import backend.academy.scrapper.repository.jpa.TagJpaRepository;
 import java.util.Collection;

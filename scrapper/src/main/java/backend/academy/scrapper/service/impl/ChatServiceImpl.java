@@ -1,9 +1,9 @@
 package backend.academy.scrapper.service.impl;
 
-import backend.academy.scrapper.Model.Chat;
-import backend.academy.scrapper.Model.Link;
 import backend.academy.scrapper.exceptions.InvalidDataException;
 import backend.academy.scrapper.exceptions.NotFoundDataException;
+import backend.academy.scrapper.model.Chat;
+import backend.academy.scrapper.model.Link;
 import backend.academy.scrapper.repository.ChatRepository;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.LinksRepository;
@@ -39,7 +39,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public void deleteChat(Long id) {
+    public void deleteChat(final Long id) {
         Chat chat = findById(id);
 
         List<Link> links = linksRepository.findAllByChat(chat);
@@ -54,7 +54,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat findById(Long id) {
+    public Chat findById(final Long id) {
         return chatRepository.findByUserId(id).orElseThrow(() -> new NotFoundDataException("Чат не найден."));
     }
 }

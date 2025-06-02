@@ -1,9 +1,9 @@
 package backend.academy.scrapper.service;
 
-import backend.academy.scrapper.Model.Link;
-import backend.academy.scrapper.dto.LinkResponse;
-import backend.academy.scrapper.dto.ListLinksResponse;
-import backend.academy.scrapper.dto.SubscriptionRequestDto;
+import backend.academy.scrapper.dto.request.SubscriptionRequestDto;
+import backend.academy.scrapper.dto.response.LinkResponse;
+import backend.academy.scrapper.dto.response.ListLinksResponse;
+import backend.academy.scrapper.model.Link;
 import java.util.Collection;
 import java.util.List;
 

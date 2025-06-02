@@ -1,16 +1,16 @@
 package backend.academy.scrapper.service.impl;
 
-import backend.academy.scrapper.Model.Chat;
-import backend.academy.scrapper.Model.Filter;
-import backend.academy.scrapper.Model.Link;
-import backend.academy.scrapper.Model.Tag;
 import backend.academy.scrapper.clients.GitHubClient;
 import backend.academy.scrapper.clients.StackOverflowClient;
-import backend.academy.scrapper.dto.LinkResponse;
-import backend.academy.scrapper.dto.ListLinksResponse;
-import backend.academy.scrapper.dto.SubscriptionRequestDto;
+import backend.academy.scrapper.dto.request.SubscriptionRequestDto;
+import backend.academy.scrapper.dto.response.LinkResponse;
+import backend.academy.scrapper.dto.response.ListLinksResponse;
 import backend.academy.scrapper.exceptions.InvalidDataException;
 import backend.academy.scrapper.exceptions.NotFoundDataException;
+import backend.academy.scrapper.model.Chat;
+import backend.academy.scrapper.model.Filter;
+import backend.academy.scrapper.model.Link;
+import backend.academy.scrapper.model.Tag;
 import backend.academy.scrapper.repository.FilterRepository;
 import backend.academy.scrapper.repository.LinksRepository;
 import backend.academy.scrapper.repository.TagRepository;
@@ -32,10 +32,15 @@ import org.springframework.util.CollectionUtils;
 public class LinkServiceImpl implements LinkService {
 
     private final LinksRepository linksRepository;
+
     private final TagRepository tagRepository;
+
     private final FilterRepository filterRepository;
+
     private final ChatService chatService;
+
     private final GitHubClient gitHubClient;
+
     private final StackOverflowClient stackOverflowClient;
 
     private static final String GITHUB_PATTERN = "^https://github\\.com/[a-zA-Z0-9\\-]+/[a-zA-Z0-9\\-]+$";
@@ -44,7 +49,7 @@ public class LinkServiceImpl implements LinkService {
 
     @Override
     @Transactional
-    public LinkResponse save(Long chatId, SubscriptionRequestDto dto) {
+    public LinkResponse save(final Long chatId, final SubscriptionRequestDto dto) {
         Chat chat = chatService.findById(chatId);
 
         Optional<Link> existingLink = linksRepository.findByNameAndChat(dto.getLink(), chat);
@@ -72,7 +77,7 @@ public class LinkServiceImpl implements LinkService {
 
     @Override
     @Transactional
-    public LinkResponse delete(Long chatId, String linkName) {
+    public LinkResponse delete(final Long chatId, final String linkName) {
         Chat chat = chatService.findById(chatId);
         Link link = linksRepository
                 .findByNameAndChat(linkName, chat)
@@ -94,7 +99,7 @@ public class LinkServiceImpl implements LinkService {
     }
 
     @Override
-    public ListLinksResponse getAllLinks(Long chatId) {
+    public ListLinksResponse getAllLinks(final Long chatId) {
         Chat chat = chatService.findById(chatId);
         List<Link> links = linksRepository.findAllByChat(chat);
 
@@ -111,14 +116,14 @@ public class LinkServiceImpl implements LinkService {
     }
 
     @Override
-    public List<String> findAllLinksByLink(String urlPrefix) {
+    public List<String> findAllLinksByLink(final String urlPrefix) {
         return linksRepository.findAllByNameStartingWith(urlPrefix).stream()
                 .map(Link::getName)
                 .toList();
     }
 
     @Override
-    public Collection<Long> findAllChatIdsByLink(String linkName) {
+    public Collection<Long> findAllChatIdsByLink(final String linkName) {
         List<Link> links = linksRepository.findAllByName(linkName);
         if (links.isEmpty()) {
             throw new InvalidDataException("Ссылки - " + linkName + " не существует");
@@ -127,11 +132,11 @@ public class LinkServiceImpl implements LinkService {
     }
 
     @Override
-    public Link findByLinkName(String link) {
+    public Link findByLinkName(final String link) {
         return linksRepository.findByName(link).orElseThrow(() -> new NotFoundDataException("Ссылка не найдена"));
     }
 
-    private void saveTags(List<String> tagNames, Link link) {
+    private void saveTags(final List<String> tagNames, final Link link) {
         if (CollectionUtils.isEmpty(tagNames)) return;
 
         List<Tag> tags = tagNames.stream()
@@ -142,7 +147,7 @@ public class LinkServiceImpl implements LinkService {
         tagRepository.saveAll(tags);
     }
 
-    private void saveFilters(List<String> filterNames, Link link) {
+    private void saveFilters(final List<String> filterNames, final Link link) {
         if (filterNames == null || filterNames.isEmpty()) return;
 
         List<Filter> filters = filterNames.stream()
@@ -153,17 +158,17 @@ public class LinkServiceImpl implements LinkService {
         filterRepository.saveAll(filters);
     }
 
-    private List<String> tagsOf(Link link) {
+    private List<String> tagsOf(final Link link) {
         return tagRepository.findAllByLink(link).stream().map(Tag::getName).toList();
     }
 
-    private List<String> filtersOf(Link link) {
+    private List<String> filtersOf(final Link link) {
         return filterRepository.findAllByLink(link).stream()
                 .map(Filter::getName)
                 .toList();
     }
 
-    public boolean linkIsCorrect(String link) {
+    public boolean linkIsCorrect(final String link) {
         if (link == null) return false;
         if (link.matches(GITHUB_PATTERN)) return gitHubClient.urlIsValid(link);
         if (link.matches(STACKOVERFLOW_PATTERN)) return stackOverflowClient.urlIsValid(link);

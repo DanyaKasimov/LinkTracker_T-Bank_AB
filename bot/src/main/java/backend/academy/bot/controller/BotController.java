@@ -16,12 +16,7 @@ public class BotController implements BotApi {
 
     @Override
     public void updateMessage(final LinkUpdateDto dto) {
-        log.atInfo()
-                .setMessage("Поступил запрос на обновление сообщений.")
-                .addKeyValue("url", dto.getUrl())
-                .addKeyValue("chatsIds", dto.getTgChatIds())
-                .addKeyValue("description", dto.getDescription())
-                .log();
+        log.info("Поступил запрос на обновление сообщений. URL: {}, ChatIDs: {}", dto.getUrl(), dto.getTgChatIds());
 
         chatManagementService.sendUpdates(dto);
     }

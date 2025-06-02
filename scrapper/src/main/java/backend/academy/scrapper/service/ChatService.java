@@ -1,6 +1,6 @@
 package backend.academy.scrapper.service;
 
-import backend.academy.scrapper.Model.Chat;
+import backend.academy.scrapper.model.Chat;
 
 public interface ChatService {
 

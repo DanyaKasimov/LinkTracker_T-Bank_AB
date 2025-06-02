@@ -1,5 +1,8 @@
 package backend.academy.scrapper.dto;
 
+import lombok.Builder;
+
+@Builder
 public record GitHubUpdate(String sha, String title, String username, String createdAt, String preview)
         implements UserMessage {
 
