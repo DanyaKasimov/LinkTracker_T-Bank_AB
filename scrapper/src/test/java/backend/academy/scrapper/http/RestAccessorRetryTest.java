@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import backend.academy.scrapper.accessor.RestAccessor;
 import backend.academy.scrapper.exceptions.HttpConnectException;
 import backend.academy.scrapper.exceptions.InvalidDataException;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,12 +18,32 @@ import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 @SpringBootTest
-@WireMockTest(httpPort = 8181)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class RestAccessorRetryTest {
 
+    private static WireMockServer wireMockServer;
+
     @Autowired
     private RestAccessor restAccessor;
+
+    @BeforeAll
+    static void beforeAll() {
+        wireMockServer = new WireMockServer(8181);
+        wireMockServer.start();
+        configureFor("localhost", 8181);
+    }
+
+    @AfterAll
+    static void afterAll() {
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
+    }
+
+    @BeforeEach
+    void resetStubs() {
+        wireMockServer.resetAll();
+    }
 
     @Test
     void shouldRetryOnInternalServerError() {

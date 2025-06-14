@@ -22,14 +22,11 @@ mvn clean install
 sh script.sh
 ```
 
-### Kafka/Redis/PostgreSQL
-
-Для запуска Kafka/Redis/PostgreSQL нужно запустить ```docker-compose.yml``` из IDE,
-
-либо выполнить команду в терминале ```docker-compose up```.
-
-### Scrapper/Bot
+### Kafka/Redis/PostgreSQL/Prometheus/Grafana/Scrapper/Bot
 
 Нужно заполнить .env файл, указав все необходимые параметры.
 
-Запуск производится из IDE.
+Для запуска Kafka/Redis/PostgreSQL/Prometheus/Grafana/Scrapper/Bot нужно запустить ```docker-compose.yml``` из IDE,
+
+либо выполнить команду в терминале ```docker-compose up```.
+
