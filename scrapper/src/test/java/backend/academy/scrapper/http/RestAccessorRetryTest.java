@@ -3,28 +3,26 @@ package backend.academy.scrapper.http;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import backend.academy.scrapper.accessor.RestAccessor;
+import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.exceptions.HttpConnectException;
 import backend.academy.scrapper.exceptions.InvalidDataException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
+import java.time.Duration;
 import java.util.Map;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.util.retry.Retry;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class RestAccessorRetryTest {
 
     private static WireMockServer wireMockServer;
-
-    @Autowired
     private RestAccessor restAccessor;
 
     @BeforeAll
@@ -42,8 +40,17 @@ class RestAccessorRetryTest {
     }
 
     @BeforeEach
-    void resetStubs() {
+    void setUp() {
         wireMockServer.resetAll();
+        ScrapperConfig config = mock(ScrapperConfig.class);
+        WebClient webClient = WebClient.builder().build();
+        Retry retry = Retry.fixedDelay(3, Duration.ofMillis(50)).filter(throwable -> {
+            if (throwable instanceof WebClientResponseException e) {
+                return e.getStatusCode().is5xxServerError();
+            }
+            return throwable instanceof WebClientRequestException;
+        });
+        restAccessor = new RestAccessor(webClient, retry, config);
     }
 
     @Test
@@ -91,9 +98,7 @@ class RestAccessorRetryTest {
                     Map.of());
         });
 
-        assertTrue(
-                ex instanceof InvalidDataException || ex instanceof HttpConnectException,
-                "Exception type: " + ex.getClass() + ", message: " + ex.getMessage());
+        assertTrue(ex instanceof InvalidDataException || ex instanceof HttpConnectException);
 
         verify(1, getRequestedFor(urlPathEqualTo("/test")));
     }
