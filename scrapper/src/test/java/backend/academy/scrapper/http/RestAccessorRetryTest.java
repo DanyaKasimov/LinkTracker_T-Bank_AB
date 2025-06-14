@@ -8,8 +8,8 @@ import backend.academy.scrapper.accessor.RestAccessor;
 import backend.academy.scrapper.exceptions.HttpConnectException;
 import backend.academy.scrapper.exceptions.InvalidDataException;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import java.util.Map;
 import com.github.tomakehurst.wiremock.core.Options;
+import java.util.Map;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -70,7 +70,7 @@ class RestAccessorRetryTest {
 
         assertDoesNotThrow(() -> {
             restAccessor.getApiAccess(
-                "http://localhost:" + wireMockServer.port() + "/test",
+                    "http://localhost:" + wireMockServer.port() + "/test",
                     new ParameterizedTypeReference<Map<String, Object>>() {},
                     Map.of(),
                     Map.of());
@@ -85,7 +85,7 @@ class RestAccessorRetryTest {
 
         Exception ex = assertThrows(Exception.class, () -> {
             restAccessor.getApiAccess(
-                "http://localhost:" + wireMockServer.port() + "/test",
+                    "http://localhost:" + wireMockServer.port() + "/test",
                     new ParameterizedTypeReference<Map<String, Object>>() {},
                     Map.of(),
                     Map.of());
