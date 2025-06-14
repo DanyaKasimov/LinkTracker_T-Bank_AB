@@ -3,6 +3,7 @@ package backend.academy.scrapper.watcher;
 import backend.academy.scrapper.clients.StackOverflowClient;
 import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.dto.StackOverflowAnswer;
+import backend.academy.scrapper.metrics.ScrapeMetrics;
 import backend.academy.scrapper.service.LinkService;
 import backend.academy.scrapper.service.NotificationService;
 import java.util.Map;
@@ -18,6 +19,8 @@ public class StackOverflowWatcher extends AbstractWatcher<StackOverflowAnswer> {
 
     private static final long FIXED_RATE = 100_000L;
 
+    private final ScrapeMetrics scrapeMetrics;
+
     private final ScrapperConfig config;
     private final StackOverflowClient stackOverflowClient;
     private final Map<String, String> lastAnswerIds = new ConcurrentHashMap<>();
@@ -26,9 +29,11 @@ public class StackOverflowWatcher extends AbstractWatcher<StackOverflowAnswer> {
             StackOverflowClient stackOverflowClient,
             LinkService linkService,
             NotificationService notificationService,
+            ScrapeMetrics scrapeMetrics,
             ScrapperConfig scrapperConfig) {
         super(linkService, notificationService, scrapperConfig.multithreading().threadCount());
         this.stackOverflowClient = stackOverflowClient;
+        this.scrapeMetrics = scrapeMetrics;
         this.config = scrapperConfig;
     }
 
@@ -55,16 +60,19 @@ public class StackOverflowWatcher extends AbstractWatcher<StackOverflowAnswer> {
     @Override
     protected void fetchAndNotify(String link) {
         try {
-            Optional<StackOverflowAnswer> answer = stackOverflowClient.getLatestAnswerOrComment(link);
-            String previous = lastAnswerIds.get(link);
-            answer.ifPresent(a -> {
-                String idStr = String.valueOf(a.answerId());
-                if (previous == null || !previous.equals(idStr)) {
-                    lastAnswerIds.put(link, idStr);
-                    if (previous != null) {
-                        sendNotification(link, a);
+            scrapeMetrics.timeScrape("stackoverflow", () -> {
+                Optional<StackOverflowAnswer> answer = stackOverflowClient.getLatestAnswerOrComment(link);
+                String previous = lastAnswerIds.get(link);
+                answer.ifPresent(a -> {
+                    String idStr = String.valueOf(a.answerId());
+                    if (previous == null || !previous.equals(idStr)) {
+                        lastAnswerIds.put(link, idStr);
+                        if (previous != null) {
+                            sendNotification(link, a);
+                        }
                     }
-                }
+                });
+                return null;
             });
         } catch (Exception e) {
             log.error("Error processing SO link {}: {}", link, e.getMessage());

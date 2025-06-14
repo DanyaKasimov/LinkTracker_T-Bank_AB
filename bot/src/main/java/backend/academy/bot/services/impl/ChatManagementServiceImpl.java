@@ -6,6 +6,7 @@ import backend.academy.bot.dto.LinkUpdateDto;
 import backend.academy.bot.services.ChatManagementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -18,6 +19,7 @@ public class ChatManagementServiceImpl implements ChatManagementService {
     private final MessageSender messageSender;
 
     @Override
+    @CacheEvict(value = "subscriptions", key = "#id")
     public String registerChat(final String id) {
         var url = String.format("/tg-chat/%s", id);
         accessor.post(url);
@@ -25,6 +27,7 @@ public class ChatManagementServiceImpl implements ChatManagementService {
     }
 
     @Override
+    @CacheEvict(value = "subscriptions", key = "#id")
     public String deleteChat(final String id) {
         var url = String.format("/tg-chat/%s", id);
         accessor.delete(url);

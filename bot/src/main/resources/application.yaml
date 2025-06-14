@@ -9,7 +9,7 @@ app:
   redis:
     duration: 30
   scrapper:
-    url: ${SCRAPPER_URL:http://localhost:8100}
+    url: ${SCRAPPER_URL:http://scrapper:8100}
   http:
     timeout:
       connect: ${TIMEOUT_CONNECT:2s}
@@ -30,16 +30,21 @@ app:
 spring:
   application:
     name: Bot
-  liquibase:
-    enabled: false
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    open-in-view: false
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
+
+management:
+  server:
+    port: 8201
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health,info"
+  metrics:
+    enable:
+      http.server.requests: true
 
 server:
   port: 8081

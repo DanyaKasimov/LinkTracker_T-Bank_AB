@@ -4,6 +4,7 @@ import backend.academy.scrapper.clients.GitHubClient;
 import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.constants.GitHubEndpoints;
 import backend.academy.scrapper.dto.GitHubUpdate;
+import backend.academy.scrapper.metrics.ScrapeMetrics;
 import backend.academy.scrapper.service.LinkService;
 import backend.academy.scrapper.service.NotificationService;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +24,8 @@ public class GitHubWatcher extends AbstractWatcher<GitHubUpdate> {
 
     private static final long FIXED_RATE = 10_000L;
 
+    private final ScrapeMetrics scrapeMetrics;
+
     private final GitHubClient gitHubClient;
     private final ScrapperConfig config;
     private final Map<String, String> lastCommitHashes = new ConcurrentHashMap<>();
@@ -32,9 +35,11 @@ public class GitHubWatcher extends AbstractWatcher<GitHubUpdate> {
             GitHubClient gitHubClient,
             LinkService linkService,
             NotificationService notificationService,
+            ScrapeMetrics scrapeMetrics,
             ScrapperConfig scrapperConfig) {
         super(linkService, notificationService, scrapperConfig.multithreading().threadCount());
         this.gitHubClient = gitHubClient;
+        this.scrapeMetrics = scrapeMetrics;
         this.config = scrapperConfig;
     }
 
@@ -61,22 +66,25 @@ public class GitHubWatcher extends AbstractWatcher<GitHubUpdate> {
     @Override
     protected void fetchAndNotify(String link) {
         try {
-            if (link.contains("/pull/")) {
-                gitHubClient
-                        .getLatestPRIssue(link, GitHubEndpoints.PULL_REQUEST)
-                        .ifPresent(update -> sendNotification(link, update));
-                return;
-            }
-            if (link.contains("/issues/")) {
-                gitHubClient
-                        .getLatestPRIssue(link, GitHubEndpoints.ISSUES)
-                        .ifPresent(update -> sendNotification(link, update));
-                return;
-            }
-            Optional<GitHubUpdate> update = gitHubClient.getLatestCommit(link);
-            String previous = lastCommitHashes.get(link);
-            update.ifPresentOrElse(
-                    u -> handleNewCommit(link, u, previous), () -> lastCommitHashes.putIfAbsent(link, ""));
+            scrapeMetrics.timeScrape("github", () -> {
+                if (link.contains("/pull/")) {
+                    gitHubClient
+                            .getLatestPRIssue(link, GitHubEndpoints.PULL_REQUEST)
+                            .ifPresent(update -> sendNotification(link, update));
+                    return null;
+                }
+                if (link.contains("/issues/")) {
+                    gitHubClient
+                            .getLatestPRIssue(link, GitHubEndpoints.ISSUES)
+                            .ifPresent(update -> sendNotification(link, update));
+                    return null;
+                }
+                Optional<GitHubUpdate> update = gitHubClient.getLatestCommit(link);
+                String previous = lastCommitHashes.get(link);
+                update.ifPresentOrElse(
+                        u -> handleNewCommit(link, u, previous), () -> lastCommitHashes.putIfAbsent(link, ""));
+                return null;
+            });
         } catch (Exception e) {
             log.error("Ошибка при обработке ссылки GitHub {}: {}", link, e.getMessage());
         }

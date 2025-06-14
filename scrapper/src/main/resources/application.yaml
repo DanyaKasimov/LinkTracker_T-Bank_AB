@@ -12,7 +12,7 @@ app:
     api-url: https://api.stackexchange.com/2.3/questions/{id}/answer
     base-url: https://stackoverflow.com/
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     topics:
       notification: notification
   http:
@@ -32,7 +32,7 @@ app:
       requests: ${RATE_LIMITING_REQUESTS:10}
       seconds: ${RATE_LIMITING_SECONDS:10}
   bot:
-    url: ${BOT_URL:http://localhost:8081}
+    url: ${BOT_URL:http://bot:8081}
 
 database:
   type: ORM
@@ -56,17 +56,27 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/migrations/master.xml
-    url: jdbc:postgresql://localhost:5433/link_tracker_db
+    url: jdbc:postgresql://postgres:5432/link_tracker_db
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   datasource:
-    url: jdbc:postgresql://localhost:5433/link_tracker_db
+    url: jdbc:postgresql://postgres:5432/link_tracker_db
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
 
+management:
+  server:
+    port: 8101
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health,info"
+  metrics:
+    enable:
+      http.server.requests: true
 
 server:
   port: 8100

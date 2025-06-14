@@ -1,6 +1,7 @@
 package backend.academy.scrapper.filter;
 
 import backend.academy.scrapper.config.ScrapperConfig;
+import backend.academy.scrapper.metrics.UserMessageMetricsService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ public class RateLimitingFilter implements Filter {
 
     private final ScrapperConfig.HttpProperties properties;
     private final Map<String, RequestWindow> ipRequests = new ConcurrentHashMap<>();
+    private final UserMessageMetricsService metricsService;
 
     private static final Pattern COMMA_PATTERN = Pattern.compile(",");
 
@@ -42,6 +44,8 @@ public class RateLimitingFilter implements Filter {
             res.getWriter().write("{\"error\": \"Превышен лимит запросов. Попробуйте позже.\"}");
             return;
         }
+
+        metricsService.increment();
 
         chain.doFilter(request, response);
     }

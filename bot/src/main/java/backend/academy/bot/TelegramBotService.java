@@ -40,10 +40,7 @@ public class TelegramBotService {
                 commandHandler.execute(chatId, text);
             }
         } catch (Exception e) {
-            log.atError()
-                    .setMessage("Непредвиденная ошибка")
-                    .addKeyValue("error", e.getMessage())
-                    .log();
+            log.error("Непредвиденная ошибка. Message: {}", e.toString());
             messageSender.send(chatId, "Произошла ошибка. Попробуйте снова.");
         }
     }

@@ -2,6 +2,7 @@ package backend.academy.scrapper.config;
 
 import backend.academy.scrapper.exceptions.HttpConnectException;
 import backend.academy.scrapper.filter.RateLimitingFilter;
+import backend.academy.scrapper.metrics.UserMessageMetricsService;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import jakarta.servlet.Filter;
@@ -53,9 +54,11 @@ public class HttpConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<Filter> rateLimitingFilter(ScrapperConfig config) {
+    public FilterRegistrationBean<Filter> rateLimitingFilter(
+            ScrapperConfig config, UserMessageMetricsService userMessageMetricsService) {
         FilterRegistrationBean<Filter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
-        filterFilterRegistrationBean.setFilter(new RateLimitingFilter(config.http()));
+        filterFilterRegistrationBean.setFilter(
+                new RateLimitingFilter(config.http(), userMessageMetricsService)); // <--- исправил!
         filterFilterRegistrationBean.addUrlPatterns("/*");
         filterFilterRegistrationBean.setOrder(1);
         return filterFilterRegistrationBean;

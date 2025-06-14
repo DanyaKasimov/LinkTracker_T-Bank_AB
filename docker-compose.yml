@@ -13,22 +13,8 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  liquibase:
-    image: liquibase/liquibase
-    depends_on:
-      - postgres
-    volumes:
-      - ./migrations:/liquibase/changelog
-    working_dir: /liquibase/changelog
-    command:
-      [
-        "--url=jdbc:postgresql://postgres:5432/link_tracker_db",
-        "--changeLogFile=master.xml",
-        "--username=postgres",
-        "--password=root",
-        "update"
-      ]
+    networks:
+      - app-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -38,6 +24,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    networks:
+      - app-network
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -50,11 +38,13 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT_HOST://0.0.0.0:9092,PLAINTEXT://0.0.0.0:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:9092,PLAINTEXT://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - app-network
 
   redis:
     image: redis:7-alpine
@@ -62,5 +52,71 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    networks:
+      - app-network
+
+  bot:
+    image: bot
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    container_name: bot
+    depends_on:
+      - kafka
+      - redis
+    ports:
+      - "8081:8081"
+      - "8201:8201"
+    networks:
+      - app-network
+
+  scrapper:
+    image: scrapper
+    build:
+      context: .
+      dockerfile: scrapper/Dockerfile
+    container_name: scrapper
+    ports:
+      - "8100:8100"
+      - "8101:8101"
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: root
+
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    depends_on:
+      - scrapper
+      - bot
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    networks:
+      - app-network
+
 volumes:
   postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

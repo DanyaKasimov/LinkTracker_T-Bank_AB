@@ -2,6 +2,7 @@ package backend.academy.bot.config;
 
 import backend.academy.bot.exceptions.HttpConnectException;
 import backend.academy.bot.filter.RateLimitingFilter;
+import backend.academy.bot.metrics.UserMessageMetricsService;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import jakarta.servlet.Filter;
@@ -53,9 +54,10 @@ public class HttpConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<Filter> rateLimitingFilter(BotConfig config) {
+    public FilterRegistrationBean<Filter> rateLimitingFilter(
+            BotConfig config, UserMessageMetricsService userMessageMetricsService) {
         FilterRegistrationBean<Filter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
-        filterFilterRegistrationBean.setFilter(new RateLimitingFilter(config.http()));
+        filterFilterRegistrationBean.setFilter(new RateLimitingFilter(config.http(), userMessageMetricsService));
         filterFilterRegistrationBean.addUrlPatterns("/*");
         filterFilterRegistrationBean.setOrder(1);
         return filterFilterRegistrationBean;

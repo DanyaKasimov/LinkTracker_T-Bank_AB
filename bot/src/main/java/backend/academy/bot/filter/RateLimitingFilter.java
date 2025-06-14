@@ -1,6 +1,7 @@
 package backend.academy.bot.filter;
 
 import backend.academy.bot.config.BotConfig;
+import backend.academy.bot.metrics.UserMessageMetricsService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +19,7 @@ public class RateLimitingFilter implements Filter {
 
     private final BotConfig.HttpProperties properties;
     private final Map<String, RequestWindow> ipRequests = new ConcurrentHashMap<>();
+    private final UserMessageMetricsService metricsService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -40,6 +42,7 @@ public class RateLimitingFilter implements Filter {
             return;
         }
 
+        metricsService.increment();
         chain.doFilter(request, response);
     }
 
