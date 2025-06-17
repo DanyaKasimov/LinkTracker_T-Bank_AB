@@ -1,7 +1,7 @@
 # Link Tracker
 
 ## Описание
-<bold>Link Tracker Bot</bold> — это сервис для отслеживания изменений в ссылках на GitHub и StackOverflow через Telegram-бота.
+<bold>Link Tracker</bold> — это сервис для отслеживания изменений в ссылках на GitHub и StackOverflow через Telegram-бота.
 Бот позволяет отслеживать новые pull requests, issues, ответы и комментарии, а также получать уведомления об изменениях.
 
 ### Поддерживаемые команды бота:
